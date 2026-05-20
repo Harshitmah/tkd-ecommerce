@@ -12,12 +12,16 @@ import {
   Download,
   Calendar,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  Trash2,
+  Activity
 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
 import { cn, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
+import { getVisitStats, resetVisits } from "@/app/actions/analytics"
 
 export default function AdminDashboard() {
   const supabase = createClient()
@@ -27,6 +31,16 @@ export default function AdminDashboard() {
   const [profiles, setProfiles] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null)
+  
+  // Live visitor stats state
+  const [visitStats, setVisitStats] = React.useState({
+    total: 0,
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+    thisYear: 0
+  })
+  const [isResetting, setIsResetting] = React.useState(false)
   
   // Filter settings
   const [timeFilter, setTimeFilter] = React.useState("this-month")
@@ -67,10 +81,10 @@ export default function AdminDashboard() {
           .order("created_at", { ascending: false })
         if (ordersErr) throw ordersErr
 
-        // 2. Fetch live profiles
+        // 2. Fetch live profiles (retrieve email and role to accurately compute registered customers)
         const { data: profilesData, error: profilesErr } = await supabase
           .from("profiles")
-          .select("id, created_at")
+          .select("id, created_at, role, email")
         if (profilesErr) throw profilesErr
 
         // 3. Fetch Currency settings
@@ -78,6 +92,10 @@ export default function AdminDashboard() {
           .from("site_settings")
           .select("currency_code, currency_symbol")
           .maybeSingle()
+
+        // 4. Fetch Visitor stats
+        const statsData = await getVisitStats()
+        setVisitStats(statsData)
 
         setOrders(ordersData || [])
         setProfiles(profilesData || [])
@@ -95,6 +113,32 @@ export default function AdminDashboard() {
 
     loadDashboard()
   }, [])
+
+  const handleResetVisits = async () => {
+    const confirmReset = window.confirm("Are you sure you want to completely reset the total visit counts? This action will permanently delete all recorded visitor logs.")
+    if (!confirmReset) return
+
+    setIsResetting(true)
+    try {
+      const result = await resetVisits()
+      if (result.success) {
+        setVisitStats({
+          total: 0,
+          today: 0,
+          thisWeek: 0,
+          thisMonth: 0,
+          thisYear: 0
+        })
+        alert("Visitor stats have been reset successfully.")
+      } else {
+        alert(`Failed to reset visitor stats: ${result.error}`)
+      }
+    } catch (err: any) {
+      alert(`An error occurred: ${err.message}`)
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   // Filter datasets based on selected month filter
   const filteredData = React.useMemo(() => {
@@ -156,24 +200,14 @@ export default function AdminDashboard() {
 
     const totalOrdersCount = filteredOrders.length
     
-    // Calculate unique customer emails in filtered orders plus registered customers
-    const uniqueEmails = new Set<string>()
-    filteredOrders.forEach((o: any) => {
-      const email = o.shipping_address?.email
-      if (email) uniqueEmails.add(email.toLowerCase().trim())
-    })
-    filteredProfiles.forEach((p: any) => {
-      const email = p.email
-      if (email) uniqueEmails.add(email.toLowerCase().trim())
-    })
-    
-    const newCustsCount = uniqueEmails.size || filteredProfiles.length
+    // Calculate actual registered customer profiles matching the time filter
+    const registeredCustomersCount = filteredProfiles.filter((p: any) => p.role === "customer").length
     const averageOrderValue = totalOrdersCount > 0 ? totalRev / totalOrdersCount : 0
 
     return {
       revenue: totalRev,
       ordersCount: totalOrdersCount,
-      customersCount: newCustsCount,
+      customersCount: registeredCustomersCount,
       avgOrder: averageOrderValue
     }
   }, [filteredData])
@@ -245,8 +279,9 @@ export default function AdminDashboard() {
   const stats = [
     { name: "Total Revenue", value: formatCurrency(metrics.revenue, currencyCode, currencySymbol), trend: "+12.5%", icon: DollarSign, isUp: true },
     { name: "Total Orders", value: String(metrics.ordersCount), trend: "+8.2%", icon: ShoppingBag, isUp: true },
-    { name: "New Customers", value: String(metrics.customersCount), trend: "+4.1%", icon: Users, isUp: true },
+    { name: "Customers", value: String(metrics.customersCount), trend: "+4.1%", icon: Users, isUp: true },
     { name: "Average Order", value: formatCurrency(metrics.avgOrder, currencyCode, currencySymbol), trend: metrics.avgOrder > 0 ? "+2.4%" : "0%", icon: TrendingUp, isUp: metrics.avgOrder > 0 },
+    { name: "Total Visits", value: String(visitStats.total), trend: "+15.3%", icon: Eye, isUp: true },
   ]
 
   const monthNames = [
@@ -310,7 +345,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <div key={stat.name} className="p-6 bg-white border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
@@ -328,6 +363,61 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Live traffic tracking breakdown */}
+      <div className="bg-white border border-gray-200 rounded-[32px] p-8 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <h3 className="text-lg font-bold text-black font-serif">Live Visit Tracking</h3>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Real-time traffic counts tracked instantly when a storefront user opens the page.
+            </p>
+          </div>
+          <Button 
+            onClick={handleResetVisits} 
+            disabled={isResetting}
+            variant="outline" 
+            size="sm" 
+            className="text-rose-600 hover:text-rose-700 border-rose-200 hover:border-rose-300 bg-rose-50/50 hover:bg-rose-50 transition-colors"
+          >
+            {isResetting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4" />
+            )}
+            Reset Total Count
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Visits</p>
+            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.total}</p>
+          </div>
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Today</p>
+            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.today}</p>
+          </div>
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Week</p>
+            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisWeek}</p>
+          </div>
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Month</p>
+            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisMonth}</p>
+          </div>
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Year</p>
+            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisYear}</p>
+          </div>
+        </div>
       </div>
 
       {/* Charts & Tables */}

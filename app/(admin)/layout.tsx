@@ -50,13 +50,43 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   const handleGlobalSearchChange = (val: string) => {
     setGlobalSearch(val)
+    
+    let targetPath = "/admin/products"
+    const trimmed = val.trim()
+    
+    // Smart Query Type Detection
+    const isOrderQuery = trimmed.startsWith("#") || (/^\d+$/.test(trimmed) && trimmed.length >= 4) || trimmed.toLowerCase().includes("od-")
+    const isCustomerQuery = trimmed.includes("@")
+    
+    if (isOrderQuery) {
+      targetPath = "/admin/orders"
+    } else if (isCustomerQuery) {
+      targetPath = "/admin/customers"
+    } else {
+      const searchFriendlyPaths = [
+        "/admin/products",
+        "/admin/orders",
+        "/admin/customers",
+        "/admin/categories",
+        "/admin/coupons",
+        "/admin/blogs",
+        "/admin/reviews"
+      ]
+      
+      // Check if the current pathname starts with any of the search-friendly prefixes
+      const matchedPath = searchFriendlyPaths.find(path => pathname.startsWith(path))
+      if (matchedPath) {
+        targetPath = matchedPath
+      }
+    }
+
     const params = new URLSearchParams(searchParams.toString())
     if (val) {
       params.set("q", val)
     } else {
       params.delete("q")
     }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    router.replace(`${targetPath}?${params.toString()}`, { scroll: false })
   }
 
   const fetchNotifications = async () => {
