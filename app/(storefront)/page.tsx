@@ -160,20 +160,20 @@ export default async function Home() {
             <div className="lg:col-span-4 relative overflow-hidden rounded-[24px] bg-black text-white p-8 flex flex-col justify-between min-h-[380px] lg:min-h-full">
               <div className="absolute inset-0 opacity-40">
                 <img
-                  src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1000"
-                  alt="Modern Lookbook"
-                  className="h-full w-full object-cover grayscale"
+                  src="/images/pure-essentials.jpg"
+                  alt="Naturally Better"
+                  className="h-full w-full object-cover"
                 />
               </div>
               <div className="relative z-10 text-left">
                 <span className="text-[8px] font-extrabold uppercase tracking-[0.4em] text-zinc-400">
-                  New Lookbook
+                  Naturally Better
                 </span>
                 <h3 className="mt-4 font-serif text-2xl font-extrabold leading-tight uppercase tracking-tight">
-                  The Modern<br />Minimalist
+                  Pure Essentials
                 </h3>
                 <p className="mt-3 text-xs text-zinc-400 font-medium leading-relaxed max-w-[200px]">
-                  Meticulously designed essentials for your daily routine. Strictly black and white.
+                  100% Pure. No Chemicals. <br></br> Made with care.
                 </p>
               </div>
               <div className="relative z-10 pt-8 text-left">
@@ -242,24 +242,24 @@ export default async function Home() {
       {/* 8. Minimalist Lifestyle Moodboard (Replacing Newsletter) */}
       <section className="py-12 md:py-16 bg-white">
         <div className="mx-auto max-w-[1600px] px-6 md:px-16 text-center">
-          <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Aesthetic Living</span>
-          <h2 className="mt-3 font-serif text-3xl font-extrabold md:text-4xl text-black uppercase tracking-tight">Curated Spaces</h2>
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Natural Essence</span>
+          <h2 className="mt-3 font-serif text-3xl font-extrabold md:text-4xl text-black uppercase tracking-tight">PURE OILS. PURE LIFESTYLE.</h2>
           <p className="mt-2 text-xs text-zinc-500 max-w-md mx-auto font-medium">
-            Explore the intersection of luxury, minimalism, and premium craftsmanship designed for your contemporary living.
+            Cold pressed & steam distilled oils inspired by nature.
           </p>
 
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { id: 1, url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800" },
-              { id: 2, url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800" },
-              { id: 3, url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800" },
-              { id: 4, url: "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=800" }
+              { id: 1, url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2004_00_37%20PM.png" },
+              { id: 2, url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2003_51_29%20PM.png" },
+              { id: 3, url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2003_52_37%20PM.png" },
+              { id: 4, url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2003_53_37%20PM.png" }
             ].map((img) => (
               <div key={img.id} className="relative overflow-hidden rounded-2xl aspect-square bg-zinc-150 group">
                 <img
                   src={img.url}
                   alt="Minimalist Lifestyle"
-                  className="absolute inset-0 h-full w-full object-cover grayscale transition-transform duration-1000 group-hover:scale-105 group-hover:grayscale-0"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>

@@ -20,19 +20,20 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
  */
 export async function ensureStorageBuckets() {
   try {
-    // 1. Check & Provision 'brand-assets' bucket
+    // 1. Check & Provision 'brand-assets' bucket (increased to 50MB limit to support high resolution banners)
     const { error: brandErr } = await supabaseAdmin.storage.getBucket('brand-assets')
     if (brandErr && (brandErr.message.includes('not found') || brandErr.message.includes('does not exist'))) {
       const { error: createErr } = await supabaseAdmin.storage.createBucket('brand-assets', {
         public: true,
-        fileSizeLimit: 5242880, // 5MB limit
+        fileSizeLimit: 52428800, // 50MB limit
       })
       if (createErr) throw createErr
       console.log("Successfully created 'brand-assets' storage bucket.")
     } else {
-      // Force update preexisting buckets to ensure they are public
+      // Force update preexisting buckets to ensure they are public and support larger files
       await supabaseAdmin.storage.updateBucket('brand-assets', {
         public: true,
+        fileSizeLimit: 52428800, // 50MB limit
       })
     }
 
@@ -185,6 +186,43 @@ export async function uploadBrandAsset(base64Data: string, filename: string, mim
   } catch (error: any) {
     console.error("Brand asset server upload failed:", error)
     return { success: false, error: error.message || "Failed to upload brand asset." }
+  }
+}
+
+/**
+ * Uploads a banner file to 'brand-assets' using FormData to support high resolution images
+ * without triggering React Server Action body serialization limits (Maximum array nesting exceeded).
+ */
+export async function uploadBannerAsset(formData: FormData) {
+  try {
+    const file = formData.get("file") as Blob
+    const filename = formData.get("filename") as string
+    const mimeType = formData.get("mimeType") as string
+
+    if (!file) throw new Error("No file payload found in FormData.")
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    
+    // Upload to Supabase Storage in 'brand-assets' bucket using admin client (bypasses RLS)
+    const { data: uploadData, error: uploadErr } = await supabaseAdmin.storage
+      .from('brand-assets')
+      .upload(filename, buffer, {
+        contentType: mimeType,
+        duplex: 'half',
+        upsert: true
+      })
+
+    if (uploadErr) throw uploadErr
+
+    // Get Public URL
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from('brand-assets')
+      .getPublicUrl(filename)
+
+    return { success: true, publicUrl }
+  } catch (error: any) {
+    console.error("Banner asset server upload failed:", error)
+    return { success: false, error: error.message || "Failed to upload banner asset." }
   }
 }
 

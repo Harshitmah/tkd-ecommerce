@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { cn } from "@/lib/utils"
-import { ensureStorageBuckets, uploadBrandAsset, saveSiteSettings } from "@/app/actions/storage"
+import { ensureStorageBuckets, uploadBrandAsset, uploadBannerAsset, saveSiteSettings } from "@/app/actions/storage"
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
@@ -196,6 +196,11 @@ export default function AdminSettingsPage() {
 
   const uploadLogo = async (file: File, field: 'logo_url' | 'logo_inverted_url' | 'favicon_url') => {
     try {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Logo uploads are limited to 5MB. Please upload a smaller logo.", "error")
+        return
+      }
+
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader()
         reader.readAsDataURL(file)
@@ -224,19 +229,18 @@ export default function AdminSettingsPage() {
 
   const uploadBanner = async (file: File) => {
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = () => {
-          const result = reader.result as string
-          const base64Data = result.split(',')[1]
-          resolve(base64Data)
-        }
-        reader.onerror = (err) => reject(err)
-      })
+      if (file.size > 50 * 1024 * 1024) {
+        showToast("Banner uploads are limited to 50MB.", "error")
+        return
+      }
 
       const fileName = `hero-banner-${Date.now()}.${file.name.split('.').pop()}`
-      const res = await uploadBrandAsset(base64, fileName, file.type)
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("filename", fileName)
+      formData.append("mimeType", file.type)
+
+      const res = await uploadBannerAsset(formData)
 
       if (!res.success) {
         showToast("Banner upload failed: " + res.error, "error")

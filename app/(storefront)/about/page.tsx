@@ -10,17 +10,17 @@ export const metadata = {
 export default function AboutPage() {
   const pillars = [
     {
-      icon: <Leaf className="h-6 w-6 text-black" />,
+      icon: <Leaf className="h-6 w-6" />,
       title: "Botanical Sourcing",
       desc: "We partner exclusively with certified organic orchards in Kashimr and coastal Tamil Nadu to source premium, single-origin almonds and coconuts."
     },
     {
-      icon: <Droplet className="h-6 w-6 text-black" />,
+      icon: <Droplet className="h-6 w-6" />,
       title: "Cold Press Extraction",
       desc: "Our extraction operates strictly below 38°C (100°F). Zero heat, zero solvents, and zero chemicals. The raw essence and molecular integrity remain fully intact."
     },
     {
-      icon: <ShieldCheck className="h-6 w-6 text-black" />,
+      icon: <ShieldCheck className="h-6 w-6" />,
       title: "Amber Glass Preservation",
       desc: "Every drop is carefully double-filtered and bottled in pharmaceutical-grade amber glass to block UV degradation, preserving freshness and nutritional potency."
     }
@@ -92,7 +92,7 @@ export default function AboutPage() {
             key={i} 
             className="flex flex-col justify-between p-8 border border-black/5 bg-zinc-50/30 rounded-[28px] hover:bg-white hover:shadow-premium transition-all duration-500 min-h-[260px] group"
           >
-            <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
+            <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
               {p.icon}
             </div>
             <div className="space-y-3 mt-6">

@@ -9,17 +9,17 @@ export const metadata = {
 export default function TermsPage() {
   const highlightCards = [
     {
-      icon: <Scale className="h-6 w-6 text-black" />,
+      icon: <Scale className="h-6 w-6" />,
       title: "Legally Binding",
       desc: "By accessing or placing orders on Telkidukan, you accept and agree to comply with our commercial terms."
     },
     {
-      icon: <CheckCircle className="h-6 w-6 text-black" />,
+      icon: <CheckCircle className="h-6 w-6" />,
       title: "Authentic Fulfillment",
       desc: "We pledge and guarantee that all oils dispatched represent absolute organic purity as listed."
     },
     {
-      icon: <ShieldAlert className="h-6 w-6 text-black" />,
+      icon: <ShieldAlert className="h-6 w-6" />,
       title: "Fair Use Integrity",
       desc: "Our products, logos, and custom extraction photography are protected under intellectual property rights."
     }
@@ -46,7 +46,7 @@ export default function TermsPage() {
             key={idx} 
             className="flex flex-col justify-between p-8 border border-black/5 bg-zinc-50/30 rounded-[28px] hover:bg-white hover:shadow-premium transition-all duration-500 min-h-[240px] group"
           >
-            <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
+            <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
               {card.icon}
             </div>
             <div className="space-y-3 mt-6">

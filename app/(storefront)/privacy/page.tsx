@@ -9,17 +9,17 @@ export const metadata = {
 export default function PrivacyPage() {
   const highlightCards = [
     {
-      icon: <Lock className="h-6 w-6 text-black" />,
+      icon: <Lock className="h-6 w-6" />,
       title: "Encrypted Transactions",
       desc: "All checkouts are processed via industry-standard SSL and PCI-DSS compliant secure payment networks."
     },
     {
-      icon: <Eye className="h-6 w-6 text-black" />,
+      icon: <Eye className="h-6 w-6" />,
       title: "Data Confidentiality",
       desc: "We strictly enforce a zero third-party marketing sharing policy. Your personal information remains private."
     },
     {
-      icon: <UserCheck className="h-6 w-6 text-black" />,
+      icon: <UserCheck className="h-6 w-6" />,
       title: "Full Account Autonomy",
       desc: "Complete authority to view, modify, or permanently erase your user profile and purchase records at any time."
     }
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
             key={idx} 
             className="flex flex-col justify-between p-8 border border-black/5 bg-zinc-50/30 rounded-[28px] hover:bg-white hover:shadow-premium transition-all duration-500 min-h-[240px] group"
           >
-            <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
+            <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
               {card.icon}
             </div>
             <div className="space-y-3 mt-6">

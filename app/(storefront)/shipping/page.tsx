@@ -9,17 +9,17 @@ export const metadata = {
 export default function ShippingPage() {
   const highlightCards = [
     {
-      icon: <Truck className="h-6 w-6 text-black" />,
+      icon: <Truck className="h-6 w-6" />,
       title: "Complimentary Shipping",
       desc: "Free express domestic shipping across India for all organic oil orders valued above ₹500."
     },
     {
-      icon: <PackageCheck className="h-6 w-6 text-black" />,
+      icon: <PackageCheck className="h-6 w-6" />,
       title: "Amber Glass Cushioning",
       desc: "Every glass bottle is cocooned in 100% biodegradable honeycomb paper wraps to guarantee crack-free transit."
     },
     {
-      icon: <RefreshCw className="h-6 w-6 text-black" />,
+      icon: <RefreshCw className="h-6 w-6" />,
       title: "14-Day Returns",
       desc: "Easy, stress-free return pickup for all unsealed, pristine original amber glass bottles."
     }
@@ -46,7 +46,7 @@ export default function ShippingPage() {
             key={idx} 
             className="flex flex-col justify-between p-8 border border-black/5 bg-zinc-50/30 rounded-[28px] hover:bg-white hover:shadow-premium transition-all duration-500 min-h-[240px] group"
           >
-            <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
+            <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-500">
               {card.icon}
             </div>
             <div className="space-y-3 mt-6">

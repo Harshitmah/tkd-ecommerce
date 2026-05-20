@@ -91,25 +91,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="mx-auto max-w-[1600px] px-6 py-12 md:px-16 md:py-20 bg-white">
       {/* Top Banner Image (Contained premium aesthetic matching homepage style but smaller) */}
-      <div className="relative h-[38vh] min-h-[280px] w-full overflow-hidden rounded-[32px] mb-12 border border-white/[0.05] shadow-lg animate-in fade-in duration-1000 flex items-center bg-black">
+      <div className="relative h-48 md:h-[30vh] md:min-h-[240px] w-full overflow-hidden rounded-[32px] mb-12 border border-white/[0.05] shadow-lg animate-in fade-in duration-1000 flex items-center bg-zinc-100">
         <img
           src={activeCategoryObj?.image_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"}
           alt={activeCategoryObj?.name || "Our Catalog"}
-          className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity"
+          className="absolute inset-0 h-full w-full object-cover opacity-100"
         />
         {/* Soft elegant deep black gradient overlay for an ultra-premium dark editorial look */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/20 to-transparent" />
 
         {/* Content overlaid inside the banner */}
-        <div className="relative z-10 max-w-2xl pl-8 md:pl-16 text-left">
+        <div className="relative z-10 max-w-2xl pl-6 md:pl-16 pr-6 text-left">
           <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-amber-400/90">
             Elegance Uncompromised
           </span>
-          <h1 className="font-serif text-4xl font-extrabold md:text-5xl lg:text-6xl tracking-tight text-white mt-2 uppercase">
+          <h1 className="font-serif text-2xl font-extrabold md:text-4xl lg:text-5xl tracking-tight text-white mt-1.5 uppercase">
             {activeCategoryObj ? activeCategoryObj.name : "Shop All"}
           </h1>
-          <p className="mt-4 text-xs font-medium tracking-wide text-zinc-300 max-w-md leading-relaxed">
+          <p className="mt-2 text-[10px] md:text-xs font-medium tracking-wide text-zinc-300 max-w-[90%] md:max-w-md leading-relaxed">
             {activeCategoryObj 
               ? `Explore our curated selection of premium ${activeCategoryObj.name.toLowerCase()} products, crafted for your daily routine.`
               : "Explore our curated catalog of modern essentials and meticulously finished boutique garments."
