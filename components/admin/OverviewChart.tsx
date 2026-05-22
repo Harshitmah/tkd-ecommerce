@@ -26,7 +26,7 @@ export function OverviewChart({ data = [], type = "line" }: { data?: { name: str
   if (type === "bar") {
     return (
       <div className="h-[350px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
             <XAxis 
@@ -67,7 +67,7 @@ export function OverviewChart({ data = [], type = "line" }: { data?: { name: str
 
   return (
     <div className="h-[350px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">

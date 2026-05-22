@@ -1,0 +1,248 @@
+[
+  {
+    "id": "tpl-vip-greeting",
+    "name": "VIP Customer Greeting",
+    "trigger_type": "ORDER_PLACED",
+    "is_active": true,
+    "nodes": [
+      {
+        "id": "node-trigger",
+        "type": "trigger",
+        "label": "When Order is Placed",
+        "config": {
+          "triggerType": "ORDER_PLACED"
+        },
+        "x": 200,
+        "y": 50
+      },
+      {
+        "id": "node-cond-vip",
+        "type": "condition",
+        "label": "Check Order Total >= ₹50",
+        "config": {
+          "conditionField": "total",
+          "conditionOperator": "gte",
+          "conditionValue": "50"
+        },
+        "x": 60,
+        "y": 240
+      },
+      {
+        "id": "node-act-email",
+        "type": "action",
+        "label": "Send VIP Greeting Email",
+        "config": {
+          "actionType": "email",
+          "emailTo": "customer",
+          "emailSubject": "Welcome to the VIP Club! ✨",
+          "emailBody": "Hi {customer_name},\n\nThank you for your premium purchase of {order_total}! As a VIP member, enjoy an exclusive 15% discount code on your next visit: VIP15.\n\nWarm regards,\nTelkidukan Support"
+        },
+        "x": 190,
+        "y": 420
+      },
+      {
+        "id": "node-act-timeline",
+        "type": "action",
+        "label": "Log VIP Timeline Note",
+        "config": {
+          "actionType": "timeline",
+          "timelineNote": "VIP high-value order flagged. Total purchase: {order_total}"
+        },
+        "x": 300,
+        "y": 680
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "node-trigger",
+        "target": "node-cond-vip"
+      },
+      {
+        "id": "e2",
+        "source": "node-cond-vip",
+        "target": "node-act-email",
+        "conditionBranch": "true"
+      },
+      {
+        "id": "e3",
+        "source": "node-act-email",
+        "target": "node-act-timeline"
+      }
+    ],
+    "run_count": 3,
+    "created_at": "2026-05-20T20:33:52.263Z",
+    "updated_at": "2026-05-20T20:33:52.629Z"
+  },
+  {
+    "id": "tpl-negative-review",
+    "name": "Negative Review Escaler",
+    "trigger_type": "REVIEW_RECEIVED",
+    "is_active": true,
+    "nodes": [
+      {
+        "id": "node-trigger",
+        "type": "trigger",
+        "label": "When Review is Received",
+        "config": {
+          "triggerType": "REVIEW_RECEIVED"
+        }
+      },
+      {
+        "id": "node-cond-low-rating",
+        "type": "condition",
+        "label": "Check Rating <= 2 Stars",
+        "config": {
+          "conditionField": "rating",
+          "conditionOperator": "lte",
+          "conditionValue": "2"
+        }
+      },
+      {
+        "id": "node-act-admin-alert",
+        "type": "action",
+        "label": "Alert Admin via Email",
+        "config": {
+          "actionType": "email",
+          "emailTo": "admin",
+          "emailSubject": "🚨 Urgent: Low Rating Received",
+          "emailBody": "Hello Administrator,\n\nA negative review was submitted by {customer_name}.\nProduct: {product_title}\nRating: {rating} / 5 stars\nReview text: \"{review_text}\"\n\nPlease reach out to resolve the customer's issues."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "node-trigger",
+        "target": "node-cond-low-rating"
+      },
+      {
+        "id": "e2",
+        "source": "node-cond-low-rating",
+        "target": "node-act-admin-alert",
+        "conditionBranch": "true"
+      }
+    ],
+    "run_count": 0,
+    "created_at": "2026-05-20T19:18:23.671Z",
+    "updated_at": "2026-05-20T19:18:23.671Z"
+  },
+  {
+    "id": "tpl-cod-confirm",
+    "name": "COD Verification Flow",
+    "trigger_type": "ORDER_PLACED",
+    "is_active": true,
+    "nodes": [
+      {
+        "id": "node-trigger",
+        "type": "trigger",
+        "label": "When Order is Placed",
+        "config": {
+          "triggerType": "ORDER_PLACED"
+        }
+      },
+      {
+        "id": "node-cond-cod",
+        "type": "condition",
+        "label": "Is COD Payment?",
+        "config": {
+          "conditionField": "payment_method",
+          "conditionOperator": "equals",
+          "conditionValue": "COD"
+        }
+      },
+      {
+        "id": "node-act-cod-email",
+        "type": "action",
+        "label": "Send COD Verification Email",
+        "config": {
+          "actionType": "email",
+          "emailTo": "customer",
+          "emailSubject": "Please Verify Your COD Order #{order_number}",
+          "emailBody": "Hi {customer_name},\n\nWe received your Cash on Delivery order #{order_number} for {order_total}.\n\nTo help us dispatch your items faster, please click here to confirm your shipping address and contact details.\n\nThank you,\nTelkidukan team"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "node-trigger",
+        "target": "node-cond-cod"
+      },
+      {
+        "id": "e2",
+        "source": "node-cond-cod",
+        "target": "node-act-cod-email",
+        "conditionBranch": "true"
+      }
+    ],
+    "run_count": 4,
+    "created_at": "2026-05-20T19:18:23.671Z",
+    "updated_at": "2026-05-20T19:18:23.671Z"
+  },
+  {
+    "id": "flow-1779309493128",
+    "name": "Order Placed Notification",
+    "trigger_type": "ORDER_PLACED",
+    "is_active": true,
+    "nodes": [
+      {
+        "id": "node-trigger",
+        "type": "trigger",
+        "label": "When Event Occurs",
+        "x": 350,
+        "y": 50,
+        "config": {
+          "triggerType": "ORDER_PLACED"
+        }
+      },
+      {
+        "id": "node-act-1779309404283",
+        "type": "action",
+        "label": "Send Automation Action",
+        "x": 270,
+        "y": 270,
+        "config": {
+          "actionType": "email",
+          "emailTo": "customer",
+          "emailSubject": "Your order details",
+          "emailBody": "Hi {customer_name}, thanks for shopping!",
+          "webhookUrl": "https://webhook.site/mock-endpoint",
+          "webhookPayload": "{\n  \"event\": \"{trigger_event}\",\n  \"total\": \"{total}\"\n}",
+          "timelineNote": "Automation action executed."
+        }
+      },
+      {
+        "id": "node-act-1779309447714",
+        "type": "action",
+        "label": "Send Automation Action",
+        "x": 290,
+        "y": 430,
+        "config": {
+          "actionType": "email",
+          "emailTo": "admin",
+          "emailSubject": "Your order details",
+          "emailBody": "Hi {customer_name}, order is placed.",
+          "webhookUrl": "https://webhook.site/mock-endpoint",
+          "webhookPayload": "{\n  \"event\": \"{trigger_event}\",\n  \"total\": \"{total}\"\n}",
+          "timelineNote": "Automation action executed."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-1779309440836",
+        "source": "node-trigger",
+        "target": "node-act-1779309404283"
+      },
+      {
+        "id": "edge-1779309478923",
+        "source": "node-act-1779309404283",
+        "target": "node-act-1779309447714"
+      }
+    ],
+    "run_count": 2,
+    "created_at": "2026-05-20T20:48:01.789Z",
+    "updated_at": "2026-05-20T20:48:02.122Z"
+  }
+]

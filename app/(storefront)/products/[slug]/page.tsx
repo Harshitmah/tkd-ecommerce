@@ -85,9 +85,9 @@ export default async function ProductPage({
 
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-12 md:px-16 md:py-20">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-16 md:py-20">
       {/* Breadcrumbs */}
-      <nav className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary-text">
+      <nav className="mb-8 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary-text">
         <Link href="/" className="hover:text-primary-text">Home</Link>
         <span>/</span>
         <Link href="/products" className="hover:text-primary-text">Shop</Link>

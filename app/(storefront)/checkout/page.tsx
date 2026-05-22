@@ -237,7 +237,7 @@ export default function CheckoutPage() {
     setAppliedCoupon(data)
   }
 
-  const saveOrder = async (razorpayId?: string) => {
+  const saveOrder = async (razorpayId?: string, isFailed: boolean = false) => {
     const res = await createOrder({
       userId: user?.id || null,
       shippingInfo,
@@ -248,6 +248,7 @@ export default function CheckoutPage() {
       discountAmount: calculatedDiscount,
       finalTotal: finalCheckoutTotal,
       razorpayId,
+      isFailed,
     })
 
     if (!res.success) {
@@ -306,6 +307,20 @@ export default function CheckoutPage() {
       }
 
       const rzp = new window.Razorpay(options)
+
+      // Handle failed payments specifically
+      rzp.on('payment.failed', async function (response: any) {
+        setIsProcessing(false)
+        try {
+          // Pass isFailed = true to officially record the failed order in DB
+          // We intentionally do NOT clear the cart so the user can try again!
+          await saveOrder(response.error.metadata?.payment_id, true)
+        } catch (err) {
+          console.error("Failed to record failed order:", err)
+        }
+        alert(`Payment Failed: ${response.error.description}`)
+      })
+
       rzp.open()
     } catch (e: any) {
       alert("Checkout failed: " + e.message)
@@ -462,8 +477,10 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <Field label="Email address" required>
-                    <Input name="email" type="email" value={shippingInfo.email} onChange={handleInputChange} placeholder="harsh@example.com" variant="pill" required />
+                  <Field label="Email address">
+                    <div className="flex h-14 w-full items-center rounded-2xl border-2 border-zinc-100 bg-zinc-50 px-4 text-sm font-semibold text-zinc-500 cursor-not-allowed">
+                      {shippingInfo.email || "No email available"}
+                    </div>
                   </Field>
                   <Field label="Phone number" required>
                     <Input name="phone" value={shippingInfo.phone} onChange={handleInputChange} placeholder="+91 00000 00000" variant="pill" required />

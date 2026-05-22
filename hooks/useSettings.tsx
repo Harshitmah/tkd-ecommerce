@@ -55,8 +55,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             show_categories_in_navbar: data.social_youtube === "true",
           })
         }
-      } catch (error) {
-        console.error("Error fetching site settings:", error)
+      } catch (error: any) {
+        console.error("Error fetching site settings:", error?.message || error?.name || JSON.stringify(error) || error)
       } finally {
         setLoading(false)
       }

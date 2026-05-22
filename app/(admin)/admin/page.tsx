@@ -15,13 +15,14 @@ import {
   AlertCircle,
   Eye,
   Trash2,
-  Activity
+  Activity,
+  Minus
 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
 import { cn, formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { getVisitStats, resetVisits } from "@/app/actions/analytics"
+import { getVisitStats, resetVisits, decreaseVisitCount, resetVisitCountForPeriod } from "@/app/actions/analytics"
 
 export default function AdminDashboard() {
   const supabase = createClient()
@@ -137,6 +138,46 @@ export default function AdminDashboard() {
       alert(`An error occurred: ${err.message}`)
     } finally {
       setIsResetting(false)
+    }
+  }
+
+  const [isUpdatingVisit, setIsUpdatingVisit] = React.useState(false)
+
+  const handleDecreaseVisit = async (period: "today" | "week" | "month" | "year") => {
+    setIsUpdatingVisit(true)
+    try {
+      const result = await decreaseVisitCount(period)
+      if (result.success) {
+        const statsData = await getVisitStats()
+        setVisitStats(statsData)
+      } else {
+        alert(result.error || `Failed to decrease ${period} count.`)
+      }
+    } catch (err: any) {
+      alert(`Error decreasing count: ${err.message}`)
+    } finally {
+      setIsUpdatingVisit(false)
+    }
+  }
+
+  const handleResetPeriodVisit = async (period: "today" | "week" | "month" | "year") => {
+    const capitalizedPeriod = period.charAt(0).toUpperCase() + period.slice(1)
+    const confirmReset = window.confirm(`Are you sure you want to reset the visitor count for ${capitalizedPeriod}? This will delete logged visits in this period while keeping your lifetime Total Visits intact.`)
+    if (!confirmReset) return
+
+    setIsUpdatingVisit(true)
+    try {
+      const result = await resetVisitCountForPeriod(period)
+      if (result.success) {
+        const statsData = await getVisitStats()
+        setVisitStats(statsData)
+      } else {
+        alert(result.error || `Failed to reset ${period} count.`)
+      }
+    } catch (err: any) {
+      alert(`Error resetting count: ${err.message}`)
+    } finally {
+      setIsUpdatingVisit(false)
     }
   }
 
@@ -397,25 +438,116 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Visits</p>
-            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.total}</p>
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex flex-col justify-between min-h-[110px]">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Visits</p>
+              <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.total}</p>
+            </div>
+            <div className="h-6" /> {/* Spacer to align with other cards */}
           </div>
-          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Today</p>
-            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.today}</p>
+
+          {/* Today Card */}
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex flex-col justify-between min-h-[110px] group relative hover:bg-white hover:shadow-sm hover:border-gray-200 transition-all duration-300">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Today</p>
+              <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.today}</p>
+            </div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-6">
+              <button
+                onClick={() => handleDecreaseVisit("today")}
+                disabled={isUpdatingVisit || visitStats.today === 0}
+                title="Decrease Today count by 1"
+                className="p-1 rounded-lg bg-gray-100 hover:bg-zinc-200 text-zinc-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleResetPeriodVisit("today")}
+                disabled={isUpdatingVisit || visitStats.today === 0}
+                title="Reset Today count to 0"
+                className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
-          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Week</p>
-            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisWeek}</p>
+
+          {/* This Week Card */}
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex flex-col justify-between min-h-[110px] group relative hover:bg-white hover:shadow-sm hover:border-gray-200 transition-all duration-300">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Week</p>
+              <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisWeek}</p>
+            </div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-6">
+              <button
+                onClick={() => handleDecreaseVisit("week")}
+                disabled={isUpdatingVisit || visitStats.thisWeek === 0}
+                title="Decrease Week count by 1"
+                className="p-1 rounded-lg bg-gray-100 hover:bg-zinc-200 text-zinc-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleResetPeriodVisit("week")}
+                disabled={isUpdatingVisit || visitStats.thisWeek === 0}
+                title="Reset Week count to 0"
+                className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
-          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Month</p>
-            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisMonth}</p>
+
+          {/* This Month Card */}
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex flex-col justify-between min-h-[110px] group relative hover:bg-white hover:shadow-sm hover:border-gray-200 transition-all duration-300">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Month</p>
+              <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisMonth}</p>
+            </div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-6">
+              <button
+                onClick={() => handleDecreaseVisit("month")}
+                disabled={isUpdatingVisit || visitStats.thisMonth === 0}
+                title="Decrease Month count by 1"
+                className="p-1 rounded-lg bg-gray-100 hover:bg-zinc-200 text-zinc-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleResetPeriodVisit("month")}
+                disabled={isUpdatingVisit || visitStats.thisMonth === 0}
+                title="Reset Month count to 0"
+                className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
-          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Year</p>
-            <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisYear}</p>
+
+          {/* This Year Card */}
+          <div className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl flex flex-col justify-between min-h-[110px] group relative hover:bg-white hover:shadow-sm hover:border-gray-200 transition-all duration-300">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">This Year</p>
+              <p className="mt-2 text-2xl font-bold text-black font-sans">{visitStats.thisYear}</p>
+            </div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-6">
+              <button
+                onClick={() => handleDecreaseVisit("year")}
+                disabled={isUpdatingVisit || visitStats.thisYear === 0}
+                title="Decrease Year count by 1"
+                className="p-1 rounded-lg bg-gray-100 hover:bg-zinc-200 text-zinc-500 hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleResetPeriodVisit("year")}
+                disabled={isUpdatingVisit || visitStats.thisYear === 0}
+                title="Reset Year count to 0"
+                className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

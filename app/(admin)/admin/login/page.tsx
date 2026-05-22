@@ -38,7 +38,7 @@ function LoginContent() {
       // Automatically sign out to clear the unauthorized customer session and break the redirect loop
       signOut()
     } else if (urlError === "timeout") {
-      setError("Your session has expired due to 10 minutes of inactivity. Please log in again.")
+      setError("Your session has expired due to 1 hour of inactivity. Please log in again.")
       showToast("Session Expired: Please log in again.", "error")
       setLoading(false)
       signOut()

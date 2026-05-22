@@ -378,7 +378,7 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
               <Button
                 variant="primary"
                 size="lg"
-                className="h-16 flex-1 rounded-2xl bg-black text-white hover:bg-zinc-900 transition-all font-bold text-base shadow-xl active:scale-95"
+                className="h-16 w-full sm:w-auto sm:flex-1 rounded-2xl bg-black text-white hover:bg-zinc-900 transition-all font-bold text-base shadow-xl active:scale-95"
                 onClick={handleAddToCart}
               >
                 <ShoppingBag className="mr-3 h-5 w-5" />
@@ -409,20 +409,20 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
 
       {/* Expanded Details Section */}
       {(highlights.length > 0 || specifications.length > 0) && (
-        <div className="mt-32 border-t border-zinc-100 pt-24 grid grid-cols-1 lg:grid-cols-2 gap-24">
+        <div className="mt-16 md:mt-32 border-t border-zinc-100 pt-12 md:pt-24 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
           {highlights.length > 0 && (
-            <div className="space-y-12">
-              <div className="space-y-4">
+            <div className="space-y-8 md:space-y-12">
+              <div className="space-y-2 md:space-y-4">
                 <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-zinc-400">Superiority</span>
-                <h2 className="text-4xl font-extrabold tracking-tight text-black">Product Highlights</h2>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">Product Highlights</h2>
               </div>
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 gap-4 md:gap-8">
                 {highlights.map((h: string, i: number) => (
-                  <div key={i} className="flex items-start gap-6 group">
-                    <div className="h-10 w-10 shrink-0 rounded-xl bg-zinc-50 flex items-center justify-center text-black font-bold text-sm group-hover:bg-black group-hover:text-white transition-all">
+                  <div key={i} className="flex items-center md:items-start gap-4 md:gap-6 group">
+                    <div className="h-8 w-8 md:h-10 md:w-10 shrink-0 rounded-[10px] md:rounded-xl bg-zinc-50 flex items-center justify-center text-black font-bold text-xs md:text-sm group-hover:bg-black group-hover:text-white transition-all">
                       0{i + 1}
                     </div>
-                    <p className="text-lg leading-relaxed text-zinc-600 font-medium">
+                    <p className="text-base md:text-lg leading-relaxed text-zinc-600 font-medium">
                       {h}
                     </p>
                   </div>
@@ -432,18 +432,18 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
           )}
 
           {specifications.length > 0 && (
-            <div className="space-y-12">
-              <div className="space-y-4">
+            <div className="space-y-8 md:space-y-12">
+              <div className="space-y-2 md:space-y-4">
                 <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-zinc-400">Intelligence</span>
-                <h2 className="text-4xl font-extrabold tracking-tight text-black">Technical Specs</h2>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">Technical Specs</h2>
               </div>
-              <div className="bg-zinc-50/50 rounded-[32px] p-10 border border-zinc-100 overflow-hidden">
+              <div className="bg-zinc-50/50 rounded-[24px] md:rounded-[32px] p-6 md:p-10 border border-zinc-100 overflow-hidden">
                 <table className="w-full">
                   <tbody className="divide-y divide-zinc-100">
                     {specifications.map((s: any, i: number) => (
                       <tr key={i} className="group">
-                        <td className="py-6 pr-6 text-xs font-bold uppercase tracking-widest text-zinc-400 group-hover:text-black transition-colors">{s.key}</td>
-                        <td className="py-6 pl-6 text-sm font-bold text-black text-right">{s.value}</td>
+                        <td className="py-4 md:py-6 pr-4 md:pr-6 text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-400 group-hover:text-black transition-colors">{s.key}</td>
+                        <td className="py-4 md:py-6 pl-4 md:pl-6 text-xs md:text-sm font-bold text-black text-right">{s.value}</td>
                       </tr>
                     ))}
                   </tbody>

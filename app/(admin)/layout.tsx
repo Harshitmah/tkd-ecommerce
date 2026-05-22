@@ -20,7 +20,8 @@ import {
   Globe,
   X,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  GitBranch
 } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useAuth } from "@/hooks/useAuth"
@@ -237,11 +238,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     setAlerts([])
   }
 
-  // ── Session Timeout Logic (10 Minutes) ────────────────────
+  // ── Session Timeout Logic (1 Hour) ────────────────────
   React.useEffect(() => {
     if (pathname === "/admin/login" || !user) return
 
-    const TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+    const TIMEOUT_MS = 60 * 60 * 1000 // 1 hour
     const STORAGE_KEY = "admin_last_active"
 
     // Update the last active timestamp in localStorage
@@ -314,6 +315,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     { name: "Coupons",   href: "/admin/coupons",   icon: Ticket },
     { name: "Media",     href: "/admin/media",     icon: ImagePlus },
     { name: "Reviews",   href: "/admin/reviews",   icon: Star },
+    { name: "Workflows", href: "/admin/workflows", icon: GitBranch },
     { name: "SEO",       href: "/admin/seo",       icon: Globe },
     { name: "Blogs",     href: "/admin/blogs",     icon: BookOpen },
     { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },

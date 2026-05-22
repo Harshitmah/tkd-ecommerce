@@ -1,0 +1,286 @@
+[
+  {
+    "id": "l_eMYOiBh8LS1Bjk1GAn8",
+    "workflow_id": "flow-1779309493128",
+    "workflow_name": "Order Placed Notification",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_number": "ORD-10019",
+      "email": "harshitmah99@gmail.com",
+      "customer_email": "harshitmah99@gmail.com",
+      "customer_name": "Harshit Maheshwari",
+      "total": 234.82,
+      "order_total": "₹234.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:53:53.047416+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Event Occurs",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-act-1779309404283",
+        "label": "Send Automation Action",
+        "type": "action",
+        "status": "success",
+        "details": "Successfully sent email via Resend to harshitmah99@gmail.com.\nSubject: Your order details"
+      },
+      {
+        "nodeId": "node-act-1779309447714",
+        "label": "Send Automation Action",
+        "type": "action",
+        "status": "success",
+        "details": "Successfully sent email via Resend to harshitmah99@gmail.com.\nSubject: Your order details"
+      }
+    ],
+    "created_at": "2026-05-20T20:53:53.956Z"
+  },
+  {
+    "id": "18n5ljfWHgLhiyGqD0Ny_",
+    "workflow_id": "tpl-cod-confirm",
+    "workflow_name": "COD Verification Flow",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_number": "ORD-10019",
+      "email": "harshitmah99@gmail.com",
+      "customer_email": "harshitmah99@gmail.com",
+      "customer_name": "Harshit Maheshwari",
+      "total": 234.82,
+      "order_total": "₹234.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:53:53.047416+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Order is Placed",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-cond-cod",
+        "label": "Is COD Payment?",
+        "type": "condition",
+        "status": "success",
+        "details": "Condition checked: Field \"payment_method\" (COD) equals \"COD\" -> Result: TRUE"
+      },
+      {
+        "nodeId": "node-act-cod-email",
+        "label": "Send COD Verification Email",
+        "type": "action",
+        "status": "success",
+        "details": "Successfully sent email via Resend to harshitmah99@gmail.com.\nSubject: Please Verify Your COD Order #ORD-10019"
+      }
+    ],
+    "created_at": "2026-05-20T20:53:52.849Z"
+  },
+  {
+    "id": "jEuii7dpmFNXZr5fYxiWZ",
+    "workflow_id": "tpl-vip-greeting",
+    "workflow_name": "VIP Customer Greeting",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_id": "42f56a40-bb38-43c4-a62a-3195cc22a819",
+      "order_number": "ORD-10019",
+      "email": "harshitmah99@gmail.com",
+      "customer_email": "harshitmah99@gmail.com",
+      "customer_name": "Harshit Maheshwari",
+      "total": 234.82,
+      "order_total": "₹234.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:53:53.047416+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Order is Placed",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-cond-vip",
+        "label": "Check Order Total >= ₹50",
+        "type": "condition",
+        "status": "success",
+        "details": "Condition checked: Field \"total\" (234.82) gte \"50\" -> Result: TRUE"
+      },
+      {
+        "nodeId": "node-act-email",
+        "label": "Send VIP Greeting Email",
+        "type": "action",
+        "status": "success",
+        "details": "Successfully sent email via Resend to harshitmah99@gmail.com.\nSubject: Welcome to the VIP Club! ✨"
+      },
+      {
+        "nodeId": "node-act-timeline",
+        "label": "Log VIP Timeline Note",
+        "type": "action",
+        "status": "success",
+        "details": "Timeline note added: \"VIP high-value order flagged. Total purchase: ₹234.82\""
+      }
+    ],
+    "created_at": "2026-05-20T20:53:52.499Z"
+  },
+  {
+    "id": "zBgGBaiQB2KS6x8vaEve7",
+    "workflow_id": "flow-1779309493128",
+    "workflow_name": "Order Placed Notification",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_number": "ORD-10018",
+      "email": "harshdexter09@gmail.com",
+      "customer_email": "harshdexter09@gmail.com",
+      "customer_name": "Harshit Dexter",
+      "total": 352.82,
+      "order_total": "₹352.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:49:52.394799+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Event Occurs",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-act-1779309404283",
+        "label": "Send Automation Action",
+        "type": "action",
+        "status": "success",
+        "details": "Resend API Error: You can only send testing emails to your own email address (harshitmah99@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain. (Note: Free tier only allows sending to your verified email address)"
+      },
+      {
+        "nodeId": "node-act-1779309447714",
+        "label": "Send Automation Action",
+        "type": "action",
+        "status": "success",
+        "details": "Successfully sent email via Resend to harshitmah99@gmail.com.\nSubject: Your order details"
+      }
+    ],
+    "created_at": "2026-05-20T20:49:52.824Z"
+  },
+  {
+    "id": "qftQN8ITZs-KxaX4hWY9v",
+    "workflow_id": "tpl-cod-confirm",
+    "workflow_name": "COD Verification Flow",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_number": "ORD-10018",
+      "email": "harshdexter09@gmail.com",
+      "customer_email": "harshdexter09@gmail.com",
+      "customer_name": "Harshit Dexter",
+      "total": 352.82,
+      "order_total": "₹352.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:49:52.394799+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Order is Placed",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-cond-cod",
+        "label": "Is COD Payment?",
+        "type": "condition",
+        "status": "success",
+        "details": "Condition checked: Field \"payment_method\" (COD) equals \"COD\" -> Result: TRUE"
+      },
+      {
+        "nodeId": "node-act-cod-email",
+        "label": "Send COD Verification Email",
+        "type": "action",
+        "status": "success",
+        "details": "Resend API Error: You can only send testing emails to your own email address (harshitmah99@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain. (Note: Free tier only allows sending to your verified email address)"
+      }
+    ],
+    "created_at": "2026-05-20T20:49:52.138Z"
+  },
+  {
+    "id": "rHoCPFYktab5sVImI6MwW",
+    "workflow_id": "tpl-vip-greeting",
+    "workflow_name": "VIP Customer Greeting",
+    "trigger_event": "ORDER_PLACED",
+    "payload": {
+      "id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_id": "fdf9bfa2-f7af-4cff-81a0-e2c57c617d28",
+      "order_number": "ORD-10018",
+      "email": "harshdexter09@gmail.com",
+      "customer_email": "harshdexter09@gmail.com",
+      "customer_name": "Harshit Dexter",
+      "total": 352.82,
+      "order_total": "₹352.82",
+      "payment_method": "COD",
+      "coupon_code": "None",
+      "products_list": "Black Sesame Oil (x1)",
+      "created_at": "2026-05-20T20:49:52.394799+00:00"
+    },
+    "status": "success",
+    "steps_executed": [
+      {
+        "nodeId": "node-trigger",
+        "label": "When Order is Placed",
+        "type": "trigger",
+        "status": "success",
+        "details": "Trigger activated: ORDER_PLACED"
+      },
+      {
+        "nodeId": "node-cond-vip",
+        "label": "Check Order Total >= ₹50",
+        "type": "condition",
+        "status": "success",
+        "details": "Condition checked: Field \"total\" (352.82) gte \"50\" -> Result: TRUE"
+      },
+      {
+        "nodeId": "node-act-email",
+        "label": "Send VIP Greeting Email",
+        "type": "action",
+        "status": "success",
+        "details": "Resend API Error: You can only send testing emails to your own email address (harshitmah99@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain. (Note: Free tier only allows sending to your verified email address)"
+      },
+      {
+        "nodeId": "node-act-timeline",
+        "label": "Log VIP Timeline Note",
+        "type": "action",
+        "status": "success",
+        "details": "Timeline note added: \"VIP high-value order flagged. Total purchase: ₹352.82\""
+      }
+    ],
+    "created_at": "2026-05-20T20:49:51.758Z"
+  }
+]

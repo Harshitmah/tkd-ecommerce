@@ -153,7 +153,7 @@ function SuccessPageContent() {
           </Link>
           <Link href="/account" className="w-full sm:w-auto">
             <Button variant="outline" className="w-full rounded-2xl h-16 px-10 font-bold tracking-widest uppercase text-xs">
-              View Order History
+              View Account
             </Button>
           </Link>
           {order?.fulfillment_status === "pending" && !order?.notes?.includes("Cancellation Requested") && (

@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
+import { triggerWorkflowEvent } from "./workflows"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -115,6 +116,20 @@ export async function createStorefrontReview(data: {
       .single()
 
     if (error) throw error
+
+    // Trigger visual automation workflow engine
+    const reviewPayload = {
+      id: review.id,
+      rating: review.rating,
+      title: review.title,
+      review_text: review.body,
+      product_title: "Storefront Testimonial",
+      customer_name: review.title || "Customer",
+      email: "customer@example.com"
+    }
+    await triggerWorkflowEvent("REVIEW_RECEIVED", reviewPayload).catch(e => {
+      console.error("Workflow trigger execution error:", e)
+    })
 
     revalidatePath("/admin/reviews")
     revalidatePath("/")
@@ -251,6 +266,36 @@ export async function createProductReview(
       .single()
 
     if (error) throw error
+
+    // Trigger visual automation workflow engine with enriched context
+    try {
+      const { data: product } = await supabaseAdmin
+        .from("products")
+        .select("title")
+        .eq("id", productId)
+        .single()
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", userId)
+        .single()
+
+      const reviewPayload = {
+        id: review.id,
+        rating: review.rating,
+        title: review.title,
+        review_text: review.body,
+        product_title: product?.title || "Product",
+        customer_name: profile?.full_name || review.title || "Customer",
+        email: profile?.email || "customer@example.com"
+      }
+      triggerWorkflowEvent("review_submitted", reviewPayload).catch(e => {
+        console.error("Workflow product review trigger error:", e)
+      })
+    } catch (triggerErr) {
+      console.error("Error setting up workflow trigger payload for review:", triggerErr)
+    }
 
     // Revalidate paths to update UI instantly
     revalidatePath(`/products`)

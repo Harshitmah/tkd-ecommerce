@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
           <p className="text-xs text-gray-400 font-medium">Daily billing performance for the selected time range</p>
         </div>
         <div className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart data={revenue}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
@@ -208,7 +208,7 @@ export default function AnalyticsPage() {
             <div className="flex h-60 items-center justify-center text-xs font-bold uppercase tracking-widest text-gray-300">No data compiled yet</div>
           ) : (
             <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={topProducts} layout="vertical" margin={{ left: 10, right: 10 }}>
                   <XAxis type="number" tick={{ fontSize: 10, fill: "#9CA3AF" }} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: "#6B7280", fontWeight: "bold" }} width={90} />
@@ -235,7 +235,7 @@ export default function AnalyticsPage() {
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-center h-[240px] gap-6">
               <div className="w-full sm:w-1/2 h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <PieChart>
                     <Pie data={topProducts} dataKey="units" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={40}>
                       {topProducts.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}

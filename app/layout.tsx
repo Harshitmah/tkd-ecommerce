@@ -3,6 +3,8 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SeoProvider } from "@/components/SeoProvider";
+import NextTopLoader from 'nextjs-toploader';
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,12 +33,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
 
-      <body className={`${inter.variable} ${montserrat.variable} font-sans`}>
+      <body className={`${inter.variable} ${montserrat.variable} font-sans`} suppressHydrationWarning>
         <Providers>
+          <NextTopLoader color="#000" height={3} showSpinner={false} />
           <SeoProvider />
           {children}
         </Providers>
-        <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );

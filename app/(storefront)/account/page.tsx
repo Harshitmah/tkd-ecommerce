@@ -539,6 +539,7 @@ export default function AccountPage() {
                              
                              {/* Desktop Actions */}
                              <div className="hidden md:flex items-center gap-3 shrink-0">
+
                                 {order.fulfillment_status === "pending" && !order.notes?.includes("Cancellation Requested") && (
                                   <Button 
                                     variant="outline" 
@@ -570,7 +571,8 @@ export default function AccountPage() {
                              </div>
 
                              {/* Mobile Actions */}
-                             <div className="flex md:hidden items-center gap-3 w-full pt-1 border-t border-zinc-100/50">
+                             <div className="flex md:hidden flex-wrap items-center gap-3 w-full pt-1 border-t border-zinc-100/50">
+
                                 {order.fulfillment_status === "pending" && !order.notes?.includes("Cancellation Requested") && (
                                   <Button 
                                     variant="outline" 
