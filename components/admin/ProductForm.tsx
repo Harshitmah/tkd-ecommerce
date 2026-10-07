@@ -658,7 +658,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                 <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Active Combos</label>
                 <div className="mt-3">
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.tags?.filter(t => t.startsWith("combo:")).map(tag => {
+                    {formData.tags?.filter((t: string) => t.startsWith("combo:")).map((tag: string) => {
                       const comboId = tag.split("combo:")[1];
                       const combo = activeCombos.find(c => c.id === comboId);
                       return (
@@ -667,7 +667,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                           <button type="button" onClick={() => {
                             setFormData(p => ({ 
                               ...p, 
-                              tags: p.tags.filter(t => t !== tag && t !== `combo_badge:${combo?.name}`) 
+                              tags: p.tags.filter((t: string) => t !== tag && t !== `combo_badge:${combo?.name}`) 
                             }))
                           }} className="hover:text-emerald-900 ml-1">
                             <X className="h-3 w-3" />
