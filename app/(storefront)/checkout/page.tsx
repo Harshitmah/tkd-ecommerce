@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { formatCurrency, cn } from "@/lib/utils"
 import { createRazorpayOrder } from "@/app/actions/razorpay"
-import { createClient } from "@/lib/supabase/client"
 import { createOrder } from "@/app/actions/orders"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
+import { createClient } from "@/lib/supabase/client"
+import { calculateComboDiscount } from "@/lib/comboLogic"
+import { getActiveCombos } from "@/app/actions/combos"
+
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
   "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", 
@@ -73,11 +76,15 @@ export default function CheckoutPage() {
   const [taxInclusive, setTaxInclusive] = React.useState(true)
   const [stateTaxOverridesString, setStateTaxOverridesString] = React.useState("")
 
+  const [shippingFeeConfig, setShippingFeeConfig] = React.useState(0)
+  const [freeShippingThresholdConfig, setFreeShippingThresholdConfig] = React.useState(500)
+  const [combos, setCombos] = React.useState<any[]>([])
+
   React.useEffect(() => {
     async function fetchSettings() {
       const { data } = await supabase
         .from("site_settings")
-        .select("currency_code, currency_symbol, razorpay_enabled, cod_enabled, social_tiktok, tax_rate, tax_inclusive, social_instagram")
+        .select("currency_code, currency_symbol, razorpay_enabled, cod_enabled, social_tiktok, tax_rate, tax_inclusive, social_instagram, shipping_fee, free_shipping_threshold")
         .maybeSingle()
       if (data) {
         if (data.currency_code) setCurrencyCode(data.currency_code)
@@ -86,6 +93,8 @@ export default function CheckoutPage() {
         if (data.tax_rate !== undefined) setStandardTaxRate(data.tax_rate || 0)
         if (data.tax_inclusive !== undefined) setTaxInclusive(!!data.tax_inclusive)
         if (data.social_instagram !== undefined) setStateTaxOverridesString(data.social_instagram || "")
+        if (data.shipping_fee !== undefined) setShippingFeeConfig(data.shipping_fee || 0)
+        if (data.free_shipping_threshold !== undefined) setFreeShippingThresholdConfig(data.free_shipping_threshold || 0)
         
         const rpActive = data.razorpay_enabled ?? true
         const codActive = data.cod_enabled ?? true
@@ -98,6 +107,9 @@ export default function CheckoutPage() {
           setPaymentMethod("online")
         }
       }
+
+      const cData = await getActiveCombos()
+      setCombos(cData)
     }
     fetchSettings()
   }, [])
@@ -138,10 +150,13 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = React.useState(false)
   const [isSuccess, setIsSuccess] = React.useState(false)
 
-  const discountAmount = appliedCoupon 
+  const couponDiscountAmount = appliedCoupon 
     ? (appliedCoupon.type === 'percentage' ? (subtotal * appliedCoupon.value / 100) : appliedCoupon.value)
     : 0
-  
+
+  const { discount: comboDiscount, appliedCombo } = React.useMemo(() => calculateComboDiscount(items, combos), [items, combos])
+  const subtotalAfterCombo = Math.max(0, subtotal - comboDiscount)
+
   const activeTaxRate = React.useMemo(() => {
     if (!shippingInfo.state) return standardTaxRate
     try {
@@ -155,7 +170,7 @@ export default function CheckoutPage() {
     return standardTaxRate
   }, [shippingInfo.state, standardTaxRate, stateTaxOverridesString])
 
-  const baseDiscountedAmount = Math.max(0, subtotal - discountAmount)
+  const baseDiscountedAmount = Math.max(0, subtotalAfterCombo - couponDiscountAmount)
 
   const taxAmount = React.useMemo(() => {
     if (taxInclusive) {
@@ -169,21 +184,26 @@ export default function CheckoutPage() {
     if (taxInclusive) {
       return baseDiscountedAmount - taxAmount
     } else {
-      return subtotal
+      return subtotalAfterCombo
     }
-  }, [subtotal, taxAmount, taxInclusive])
+  }, [subtotalAfterCombo, taxAmount, taxInclusive, baseDiscountedAmount])
 
   const calculatedDiscount = React.useMemo(() => {
-    return discountAmount
-  }, [discountAmount])
+    return couponDiscountAmount + comboDiscount
+  }, [couponDiscountAmount, comboDiscount])
+
+  const shippingCost = React.useMemo(() => {
+    if (subtotalAfterCombo >= freeShippingThresholdConfig) return 0
+    return shippingFeeConfig
+  }, [subtotalAfterCombo, freeShippingThresholdConfig, shippingFeeConfig])
 
   const finalCheckoutTotal = React.useMemo(() => {
     if (taxInclusive) {
-      return baseDiscountedAmount
+      return baseDiscountedAmount + shippingCost
     } else {
-      return baseDiscountedAmount + taxAmount
+      return baseDiscountedAmount + taxAmount + shippingCost
     }
-  }, [baseDiscountedAmount, taxAmount, taxInclusive])
+  }, [baseDiscountedAmount, taxAmount, taxInclusive, shippingCost])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -662,10 +682,16 @@ export default function CheckoutPage() {
                   <span className="text-zinc-400">Subtotal</span>
                   <span className="text-black font-bold">{formatCurrency(calculatedSubtotal, currencyCode, currencySymbol)}</span>
                 </div>
+                {appliedCombo && (
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-zinc-400">{appliedCombo.name}</span>
+                    <span className="text-emerald-500 font-bold">-{formatCurrency(comboDiscount, currencyCode, currencySymbol)}</span>
+                  </div>
+                )}
                 {appliedCoupon && (
                   <div className="flex justify-between text-sm font-medium">
-                    <span className="text-zinc-400">Discount</span>
-                    <span className="text-emerald-500 font-bold">-{formatCurrency(calculatedDiscount, currencyCode, currencySymbol)}</span>
+                    <span className="text-zinc-400">Coupon Discount</span>
+                    <span className="text-emerald-500 font-bold">-{formatCurrency(couponDiscountAmount, currencyCode, currencySymbol)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-medium">
@@ -674,7 +700,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-zinc-400">Shipping</span>
-                  <span className="text-emerald-500 font-bold uppercase tracking-widest text-[11px]">FREE</span>
+                  {shippingCost === 0 ? (
+                    <span className="text-emerald-500 font-bold uppercase tracking-widest text-[11px]">FREE</span>
+                  ) : (
+                    <span className="text-black font-bold">{formatCurrency(shippingCost, currencyCode, currencySymbol)}</span>
+                  )}
                 </div>
                 
                 <div className="flex justify-between border-t border-zinc-100 pt-8 text-2xl font-extrabold tracking-tight text-black">

@@ -9,14 +9,32 @@ import { useCart } from "@/hooks/useCart"
 import { Button } from "@/components/ui/Button"
 import { formatCurrency, cn } from "@/lib/utils"
 import { useSettings } from "@/hooks/useSettings"
+import { getActiveCombos } from "@/app/actions/combos"
+import { calculateComboDiscount } from "@/lib/comboLogic"
+import confetti from "canvas-confetti"
 
 export function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, removeItem, updateQuantity, subtotal } = useCart()
   const { settings } = useSettings()
+  const [combos, setCombos] = React.useState<any[]>([])
 
   const currency = settings?.currency_code || "USD"
   const symbol = settings?.currency_symbol || "$"
 
+  React.useEffect(() => {
+    async function fetchCombos() {
+      const data = await getActiveCombos()
+      setCombos(data)
+    }
+    fetchCombos()
+  }, [])
+
+  const { discount: comboDiscount, appliedCombo } = React.useMemo(() => calculateComboDiscount(items, combos), [items, combos])
+  const finalSubtotal = Math.max(0, subtotal - comboDiscount)
+  const shippingFee = settings?.shipping_fee || 0
+  const freeShippingThreshold = settings?.free_shipping_threshold || 0
+  const isShippingFree = finalSubtotal >= freeShippingThreshold || shippingFee === 0
+  
   // Prevent scroll when drawer is open
   React.useEffect(() => {
     if (isCartOpen) {
@@ -28,6 +46,21 @@ export function CartDrawer() {
       document.body.style.overflow = "unset"
     }
   }, [isCartOpen])
+
+  const prevComboRef = React.useRef<string | null>(null)
+  React.useEffect(() => {
+    if (isCartOpen && appliedCombo && appliedCombo.id !== prevComboRef.current) {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#34d399', '#fbbf24', '#f59e0b']
+      });
+      prevComboRef.current = appliedCombo.id;
+    } else if (!appliedCombo) {
+      prevComboRef.current = null;
+    }
+  }, [appliedCombo, isCartOpen])
 
   return (
     <AnimatePresence>
@@ -147,18 +180,46 @@ export function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t border-black/5 bg-zinc-50/50 p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-sm font-medium text-secondary-text">Subtotal</span>
-                  <span className="text-xl font-bold">{formatCurrency(subtotal, currency, symbol)}</span>
+              <div className="border-t border-black/5 bg-zinc-50/50 p-6 space-y-4">
+                {appliedCombo && (
+                  <div className="flex items-center justify-between text-sm font-bold text-emerald-600">
+                    <span>{appliedCombo.name}</span>
+                    <span>-{formatCurrency(comboDiscount, currency, symbol)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-secondary-text">Subtotal</span>
+                  <span className="font-bold">{formatCurrency(finalSubtotal, currency, symbol)}</span>
                 </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-secondary-text">Shipping</span>
+                  {isShippingFree ? (
+                    <span className="font-bold text-emerald-600 uppercase tracking-widest text-[11px]">Free</span>
+                  ) : (
+                    <span className="font-bold">{formatCurrency(shippingFee, currency, symbol)}</span>
+                  )}
+                </div>
+                {!isShippingFree && freeShippingThreshold > 0 && (
+                  <div className="space-y-2 mt-1">
+                    <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider text-right">
+                      Add {formatCurrency(freeShippingThreshold - finalSubtotal, currency, symbol)} more for free shipping
+                    </p>
+                    <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 transition-all duration-700 ease-out" 
+                        style={{ width: `${Math.min(100, (finalSubtotal / freeShippingThreshold) * 100)}%` }} 
+                      />
+                    </div>
+                  </div>
+                )}
+                
                 <Link href="/checkout" onClick={() => setIsCartOpen(false)}>
-                  <Button variant="primary" className="w-full h-14 text-base">
+                  <Button variant="primary" className="w-full h-14 text-base mt-2">
                     Checkout
                   </Button>
                 </Link>
-                <p className="mt-4 text-center text-xs text-secondary-text">
-                  Shipping and taxes calculated at checkout.
+                <p className="text-center text-xs text-secondary-text mt-2">
+                  Taxes calculated at checkout.
                 </p>
               </div>
             )}

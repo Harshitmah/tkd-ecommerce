@@ -11,6 +11,7 @@ export interface CartItem {
   quantity: number
   image: string
   variantInfo?: any
+  tags?: string[]
 }
 
 interface CartContextType {

@@ -37,26 +37,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[90vh] max-w-lg flex-col items-center justify-center px-6 py-20 animate-in fade-in duration-1000">
-      <div className="w-full bg-white border border-zinc-100 shadow-2xl rounded-[40px] p-10 md:p-16">
-        <div className="flex flex-col items-center text-center mb-12">
-          <span className="text-xs font-bold uppercase tracking-[0.6em] text-accent mb-6">Portal Access</span>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-black">
-            Create Profile
+    <div className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center px-6 py-12 animate-in fade-in duration-500">
+      <div className="w-full bg-white border border-zinc-100 shadow-sm rounded-3xl p-8 md:p-10">
+        <div className="flex flex-col items-center text-center mb-8">
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-black">
+            Create Account
           </h1>
-          <p className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-zinc-400 leading-relaxed max-w-[280px]">
-            Create a new account.
+          <p className="mt-2 text-sm text-zinc-500">
+            Sign up for a new account.
           </p>
         </div>
 
-        <form onSubmit={handleRegister} className="space-y-8">
+        <form onSubmit={handleRegister} className="space-y-6">
           <Input
             label="Full Name"
             placeholder="e.g. John Doe"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            className="text-lg py-6"
           />
 
           <Input
@@ -66,7 +64,6 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="text-lg py-6"
           />
 
           <Input
@@ -75,7 +72,6 @@ export default function RegisterPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
-            className="text-lg py-6"
           />
           
           <Input
@@ -85,13 +81,12 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="text-lg py-6"
           />
 
           {error && (
-            <div className="bg-red-50 p-6 rounded-2xl border-2 border-red-100 flex items-start gap-4">
-              <X className="h-5 w-5 text-red-600 shrink-0 mt-1" />
-              <p className="text-[10px] font-bold text-red-600 uppercase tracking-[0.2em] leading-relaxed">
+            <div className="bg-red-50 p-4 rounded-2xl border border-red-100 flex items-start gap-3">
+              <X className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-red-600 leading-relaxed">
                 {error}
               </p>
             </div>
@@ -100,22 +95,20 @@ export default function RegisterPage() {
           <Button
             variant="primary"
             size="lg"
-            className="h-16 w-full rounded-2xl shadow-premium text-xs font-bold uppercase tracking-[0.3em]"
+            className="h-14 w-full rounded-2xl text-sm font-bold tracking-wide"
             type="submit"
             loading={loading}
           >
             Sign Up
-            <ArrowRight className="ml-4 h-5 w-5" />
           </Button>
         </form>
 
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center">
           <Link 
             href="/login" 
-            className="group flex items-center justify-center gap-3 w-full text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-black transition-all"
+            className="text-sm font-semibold text-zinc-500 hover:text-black transition-all"
           >
-            <div className="h-px w-8 bg-zinc-200 transition-all group-hover:w-12 group-hover:bg-black" />
-            Login
+            Already have an account? <span className="text-black">Sign In</span>
           </Link>
         </div>
       </div>

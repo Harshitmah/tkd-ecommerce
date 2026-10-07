@@ -310,6 +310,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Products",  href: "/admin/products",  icon: Package },
     { name: "Categories", href: "/admin/categories", icon: LayoutGrid },
+    { name: "Combos",    href: "/admin/combos",    icon: Ticket },
     { name: "Orders",    href: "/admin/orders",    icon: ShoppingBag },
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Coupons",   href: "/admin/coupons",   icon: Ticket },

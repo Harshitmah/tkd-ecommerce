@@ -72,6 +72,7 @@ export default async function ProductPage({
     .from("products")
     .select(`
       *,
+      tags,
       category:categories(name, slug),
       images:product_images(image_url)
     `)
@@ -85,9 +86,9 @@ export default async function ProductPage({
 
 
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-16 md:py-20">
+    <div className="mx-auto max-w-[1440px] px-4 py-4 md:px-16 md:py-8">
       {/* Breadcrumbs */}
-      <nav className="mb-8 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary-text">
+      <nav className="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary-text">
         <Link href="/" className="hover:text-primary-text">Home</Link>
         <span>/</span>
         <Link href="/products" className="hover:text-primary-text">Shop</Link>

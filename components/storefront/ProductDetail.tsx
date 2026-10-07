@@ -67,17 +67,12 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
   const variantSalePrice = selectedVariant?.option_values?.[0]?.sale_price
   const variantRegularPrice = selectedVariant?.price
 
-  const displayPrice = selectedVariant 
-    ? (variantSalePrice || variantRegularPrice || product.price)
-    : (product.sale_price || product.price)
+  const basePrice = variantRegularPrice || product.price
+  const salePrice = variantSalePrice || product.sale_price
 
-  const hasSale = selectedVariant 
-    ? (!!variantSalePrice && variantSalePrice < variantRegularPrice) 
-    : (!!product.sale_price && product.sale_price < product.price)
-
-  const originalPrice = hasSale 
-    ? (selectedVariant ? variantRegularPrice : product.price) 
-    : null
+  const displayPrice = salePrice || basePrice
+  const originalPrice = basePrice
+  const hasSale = !!salePrice && salePrice < basePrice
 
   // Parse structured data from description
   const parseDescription = (desc: string) => {
@@ -88,17 +83,18 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
         const data = JSON.parse(rawJson)
         return {
           text: parts[0].trim(),
-          highlights: data.highlights || [],
-          specifications: data.specifications || []
+          ingredients: data.ingredients || "",
+          howToUse: data.howToUse || data.highlights || [],
+          additionalInfo: data.additionalInfo || data.specifications || []
         }
       }
     } catch (e) {
       console.error("Error parsing product data", e)
     }
-    return { text: desc, highlights: [], specifications: [] }
+    return { text: desc, ingredients: "", howToUse: [], additionalInfo: [] }
   }
 
-  const { text, highlights, specifications } = parseDescription(product.description || "")
+  const { text, ingredients, howToUse, additionalInfo } = parseDescription(product.description || "")
 
   const handleAddToCart = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -113,13 +109,14 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
       quantity,
       image: mainImage,
       variantInfo: selectedVariant ? { "Variant": selectedVariant.option_values?.[0]?.value } : undefined,
+      tags: product.tags || [],
     })
     
     setTimeout(() => setIsCartOpen(true), 500)
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 lg:py-20 animate-in fade-in duration-1000">
+    <div className="mx-auto max-w-7xl px-4 py-2 lg:py-6 animate-in fade-in duration-1000">
       <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24">
         {/* Left: Image Gallery */}
         <div className="flex flex-col gap-6">
@@ -316,22 +313,6 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
             )}
           </div>
 
-          <p className="mt-8 text-base leading-relaxed text-zinc-600 font-medium max-w-xl">
-            {text || "Perfect for home workouts, this resistance band set helps improve strength, flexibility, and endurance. Suitable for beginners and professionals."}
-          </p>
-
-          {/* Highlights Summary */}
-          {highlights.length > 0 && (
-            <div className="mt-8 space-y-3">
-              {highlights.slice(0, 3).map((h: string, i: number) => (
-                <div key={i} className="flex items-center gap-3 text-sm font-medium text-black/80">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  {h}
-                </div>
-              ))}
-            </div>
-          )}
-
           <div className="mt-12 space-y-10 border-t border-zinc-100 pt-10">
             {/* Variants */}
             {product.variants && product.variants.length > 0 && (
@@ -407,52 +388,72 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
         </div>
       </div>
 
-      {/* Expanded Details Section */}
-      {(highlights.length > 0 || specifications.length > 0) && (
-        <div className="mt-16 md:mt-32 border-t border-zinc-100 pt-12 md:pt-24 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-          {highlights.length > 0 && (
-            <div className="space-y-8 md:space-y-12">
-              <div className="space-y-2 md:space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-zinc-400">Superiority</span>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">Product Highlights</h2>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:gap-8">
-                {highlights.map((h: string, i: number) => (
-                  <div key={i} className="flex items-center md:items-start gap-4 md:gap-6 group">
-                    <div className="h-8 w-8 md:h-10 md:w-10 shrink-0 rounded-[10px] md:rounded-xl bg-zinc-50 flex items-center justify-center text-black font-bold text-xs md:text-sm group-hover:bg-black group-hover:text-white transition-all">
-                      0{i + 1}
-                    </div>
-                    <p className="text-base md:text-lg leading-relaxed text-zinc-600 font-medium">
-                      {h}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Expanded Details Section - Accordion Style */}
+      <div className="mt-12 border-t border-zinc-100 pt-8 pb-16 max-w-3xl mx-auto">
+        <Accordion title="What does it do for you ?">
+          <p className="leading-relaxed whitespace-pre-wrap">{text || "Information not available."}</p>
+        </Accordion>
+        
+        <Accordion title="Ingredients">
+          <p className="leading-relaxed whitespace-pre-wrap">
+            {ingredients || "Please refer to the product packaging for the full ingredients list."}
+          </p>
+        </Accordion>
 
-          {specifications.length > 0 && (
-            <div className="space-y-8 md:space-y-12">
-              <div className="space-y-2 md:space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-zinc-400">Intelligence</span>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">Technical Specs</h2>
-              </div>
-              <div className="bg-zinc-50/50 rounded-[24px] md:rounded-[32px] p-6 md:p-10 border border-zinc-100 overflow-hidden">
-                <table className="w-full">
-                  <tbody className="divide-y divide-zinc-100">
-                    {specifications.map((s: any, i: number) => (
-                      <tr key={i} className="group">
-                        <td className="py-4 md:py-6 pr-4 md:pr-6 text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-400 group-hover:text-black transition-colors">{s.key}</td>
-                        <td className="py-4 md:py-6 pl-4 md:pl-6 text-xs md:text-sm font-bold text-black text-right">{s.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <Accordion title="How to Use">
+          {howToUse.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2">
+              {howToUse.map((step: string, i: number) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="leading-relaxed">Apply directly to the targeted area as needed.</p>
           )}
-        </div>
-      )}
+        </Accordion>
+
+        {additionalInfo.length > 0 && (
+          <Accordion title="Additional Information">
+            <div className="space-y-2">
+              {additionalInfo.map((info: any, i: number) => (
+                <div key={i} className="flex justify-between border-b border-zinc-100 pb-2 last:border-0">
+                  <span className="font-semibold text-zinc-900">{info.key}</span>
+                  <span className="text-zinc-600">{info.value}</span>
+                </div>
+              ))}
+            </div>
+          </Accordion>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Accordion({ title, children }: { title: string, children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = React.useState(false)
+  return (
+    <div className="border-b border-zinc-200">
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="flex w-full items-center justify-between py-5 text-left font-medium text-black hover:text-zinc-600 transition-colors"
+      >
+        <span className="text-base font-serif">{title}</span>
+        <span className="text-2xl font-light leading-none">{isOpen ? "−" : "+"}</span>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pb-6 pt-2 text-sm text-zinc-600">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

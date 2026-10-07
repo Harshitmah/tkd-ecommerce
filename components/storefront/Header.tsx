@@ -17,15 +17,15 @@ export function Header() {
   const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
   const { settings } = useSettings()
-  
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const [isMobileShopOpen, setIsMobileShopOpen] = React.useState(false)
   const [isSearchOpen, setIsSearchOpen] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
-  
+
   const [categories, setCategories] = React.useState<any[]>([])
   const [products, setProducts] = React.useState<any[]>([])
-  
+
   // Unified Dropdown State: 'shop' | category_uuid | null
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
   const [megaMenuTimer, setMegaMenuTimer] = React.useState<NodeJS.Timeout | null>(null)
@@ -98,13 +98,22 @@ export function Header() {
     ["rgba(0, 0, 0, 0.05)", "rgba(0, 0, 0, 0.05)"]
   )
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/products" },
-    { name: "Blog", href: "/blog" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ]
+  // Parse dynamic navLinks from settings
+  const navLinks = React.useMemo(() => {
+    const defaults = [
+      { name: "Home", href: "/" },
+      { name: "Shop", href: "/products" },
+      { name: "Blog", href: "/blog" },
+      { name: "About", href: "/about" },
+      { name: "Contact", href: "/contact" },
+    ]
+    if (!settings?.social_tiktok) return defaults
+    try {
+      const parsed = JSON.parse(settings.social_tiktok)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    } catch (e) { }
+    return defaults
+  }, [settings?.social_tiktok])
 
   const showAnnouncement = settings?.announcement_bar_active && settings?.announcement_bar_text
 
@@ -114,8 +123,8 @@ export function Header() {
     <>
       <div className="fixed left-0 right-0 top-0 z-50 flex flex-col w-full">
         {showAnnouncement && (
-          <div 
-            style={{ backgroundColor: settings.announcement_bar_color || "#1A1A1A" }} 
+          <div
+            style={{ backgroundColor: settings.announcement_bar_color || "#1A1A1A" }}
             className="w-full h-9 flex items-center justify-center text-center px-4"
           >
             {settings.announcement_bar_link ? (
@@ -129,18 +138,18 @@ export function Header() {
             )}
           </div>
         )}
-        
+
         <motion.header
-          style={{ 
-            height: headerHeight, 
+          style={{
+            height: headerHeight,
             backgroundColor: headerBg,
-            borderBottomColor: headerBorder 
+            borderBottomColor: headerBorder
           }}
           className="w-full flex items-center px-4 md:px-16 border-b transition-all duration-300 backdrop-blur-md relative"
         >
           {/* Organically flowing navigation container (fixed link squeezes) */}
           <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between relative">
-            
+
             {/* Left Nav: Scales dynamically using flex-1 with smaller padding gaps */}
             <div className="flex items-center flex-1 justify-start shrink-0 min-w-0">
               <button
@@ -150,7 +159,7 @@ export function Header() {
               >
                 <Menu className="h-5 w-5" />
               </button>
-              
+
               <nav className="hidden items-center gap-6 lg:flex flex-wrap-none">
                 {/* 1. Home Link */}
                 <Link
@@ -166,15 +175,15 @@ export function Header() {
                     Home
                   </span>
                   {pathname === "/" && (
-                    <motion.div 
-                      layoutId="activeNavIndicator" 
-                      className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black" 
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black"
                     />
                   )}
                 </Link>
 
                 {/* 2. Shop Link (Triggers Mega Menu) */}
-                <div 
+                <div
                   onMouseEnter={() => handleMouseEnter("shop")}
                   onMouseLeave={handleMouseLeave}
                   className="relative py-2 flex flex-col items-center group/link cursor-pointer whitespace-nowrap"
@@ -191,9 +200,9 @@ export function Header() {
                     <ChevronDown className="h-3 w-3 text-zinc-400 group-hover/link:text-black transition-colors" />
                   </Link>
                   {pathname.startsWith("/products") && !pathname.includes("category=") && (
-                    <motion.div 
-                      layoutId="activeNavIndicator" 
-                      className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black" 
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black"
                     />
                   )}
                 </div>
@@ -221,9 +230,9 @@ export function Header() {
                         <ChevronDown className="h-3 w-3 text-zinc-300 group-hover/link:text-black transition-colors" />
                       </Link>
                       {isActive && (
-                        <motion.div 
-                          layoutId="activeNavIndicator" 
-                          className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black" 
+                        <motion.div
+                          layoutId="activeNavIndicator"
+                          className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black"
                         />
                       )}
                     </div>
@@ -235,20 +244,20 @@ export function Header() {
             {/* Center: Logo (Stays centered, no longer squished) */}
             <div className="flex items-center justify-center px-6 md:px-10 shrink-0">
               <Link href="/" className="flex items-center group">
-                 {settings?.logo_url ? (
-                   <img 
-                     src={settings.logo_url} 
-                     alt={settings.site_name || "Logo"} 
-                     className="h-7 md:h-9 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
-                   />
-                 ) : (
-                   <div className="flex items-center gap-1.5 md:gap-2">
-                      <span className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-black uppercase leading-none">
-                        {settings?.site_name || "Telkidukan"}
-                      </span>
-                      <div className="h-5 md:h-6 w-[2px] bg-black rotate-[15deg] group-hover:rotate-[30deg] transition-transform duration-500" />
-                   </div>
-                 )}
+                {settings?.logo_url ? (
+                  <img
+                    src={settings.logo_url}
+                    alt={settings.site_name || "Logo"}
+                    className="h-7 md:h-9 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                    <span className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-black uppercase leading-none">
+                      {settings?.site_name || "Telkidukan"}
+                    </span>
+                    <div className="h-5 md:h-6 w-[2px] bg-black rotate-[15deg] group-hover:rotate-[30deg] transition-transform duration-500" />
+                  </div>
+                )}
               </Link>
             </div>
 
@@ -270,23 +279,23 @@ export function Header() {
                       {link.name}
                     </span>
                     {pathname === link.href && (
-                      <motion.div 
-                        layoutId="activeNavIndicator" 
-                        className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black" 
+                      <motion.div
+                        layoutId="activeNavIndicator"
+                        className="absolute bottom-0 h-[4px] w-[4px] rounded-full bg-black"
                       />
                     )}
                   </Link>
                 ))}
               </nav>
 
-              <button 
+              <button
                 onClick={() => setIsSearchOpen(true)}
                 className="flex h-10 w-10 items-center justify-center transition-all hover:scale-105 active:scale-95 text-black cursor-pointer"
                 aria-label="Search products"
               >
                 <Search className="h-4.5 w-4.5 stroke-[1.5]" />
               </button>
-              
+
               <Link
                 href="/wishlist"
                 className="group relative flex h-10 w-10 items-center justify-center text-black cursor-pointer transition-all hover:scale-105 active:scale-95"
@@ -308,7 +317,7 @@ export function Header() {
                 <User className="h-4.5 w-4.5 stroke-[1.5]" />
               </Link>
 
-              <button 
+              <button
                 onClick={() => setIsCartOpen(true)}
                 className="group relative flex h-10 w-10 items-center justify-center text-black cursor-pointer transition-all hover:scale-105 active:scale-95"
                 aria-label="Shopping bag"
@@ -339,75 +348,75 @@ export function Header() {
                 {activeDropdown === "shop" ? (
                   /* Standard Global "Shop" Mega Menu */
                   <div className="mx-auto max-w-[1600px] grid grid-cols-12 gap-12 text-left">
-                     {/* Column 1: Shop by Category */}
-                     <div className="col-span-4 space-y-6">
-                        <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Shop by Category</span>
-                        <div className="grid gap-4">
-                           {categories.map((cat) => (
-                              <Link 
-                                 key={cat.id} 
-                                 href={`/products?category=${cat.slug}`}
-                                 onClick={() => setActiveDropdown(null)}
-                                 className="group/item flex items-center gap-4 p-2 rounded-xl hover:bg-black/[0.02] transition-all"
-                              >
-                                 {cat.image_url && (
-                                    <div className="h-12 w-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100">
-                                       <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover transition-transform group-hover/item:scale-105" />
-                                    </div>
-                                 )}
-                                 <div>
-                                    <h4 className="font-serif text-sm font-bold text-black uppercase tracking-wider group-hover/item:text-blue-600 transition-colors">{cat.name}</h4>
-                                    <p className="text-[10px] text-zinc-400 font-medium line-clamp-1 mt-0.5">{cat.description || "Discover premium quality cold-pressed oils"}</p>
-                                  </div>
-                              </Link>
-                           ))}
-                        </div>
-                     </div>
+                    {/* Column 1: Shop by Category */}
+                    <div className="col-span-4 space-y-6">
+                      <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Shop by Category</span>
+                      <div className="grid gap-4">
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            href={`/products?category=${cat.slug}`}
+                            onClick={() => setActiveDropdown(null)}
+                            className="group/item flex items-center gap-4 p-2 rounded-xl hover:bg-black/[0.02] transition-all"
+                          >
+                            {cat.image_url && (
+                              <div className="h-12 w-12 rounded-lg overflow-hidden shrink-0 bg-zinc-100">
+                                <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover transition-transform group-hover/item:scale-105" />
+                              </div>
+                            )}
+                            <div>
+                              <h4 className="font-serif text-sm font-bold text-black uppercase tracking-wider group-hover/item:text-blue-600 transition-colors">{cat.name}</h4>
+                              <p className="text-[10px] text-zinc-400 font-medium line-clamp-1 mt-0.5">{cat.description || "Discover premium quality cold-pressed oils"}</p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
 
-                     {/* Column 2: Curated Collections */}
-                     <div className="col-span-4 space-y-6 border-l border-black/5 pl-12">
-                        <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Curated Collections</span>
-                        <div className="flex flex-col gap-6">
-                           {[
-                              { name: "New Arrivals", desc: "Experience our freshest small-batch cold-press extractions", href: "/products?sort=newest" },
-                              { name: "Best Sellers", desc: "Our most trusted, high-altitude wood-pressed essentials", href: "/products" },
-                              { name: "Single Origin Premium", desc: "Sourced direct from coastal farms and high mountain valleys", href: "/about" },
-                           ].map((item) => (
-                              <Link 
-                                 key={item.name} 
-                                 href={item.href}
-                                 onClick={() => setActiveDropdown(null)}
-                                 className="group/col-item block"
-                              >
-                                 <h4 className="font-serif text-sm font-bold text-black uppercase tracking-wider group-hover/col-item:text-blue-600 transition-colors">{item.name}</h4>
-                                 <p className="text-[10px] text-zinc-400 font-medium mt-1 leading-relaxed">{item.desc}</p>
-                              </Link>
-                           ))}
-                        </div>
-                     </div>
+                    {/* Column 2: Curated Collections */}
+                    <div className="col-span-4 space-y-6 border-l border-black/5 pl-12">
+                      <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Curated Collections</span>
+                      <div className="flex flex-col gap-6">
+                        {[
+                          { name: "New Arrivals", desc: "Experience our freshest small-batch cold-press extractions", href: "/products?sort=newest" },
+                          { name: "Best Sellers", desc: "Our most trusted, high-altitude wood-pressed essentials", href: "/products" },
+                          { name: "Single Origin Premium", desc: "Sourced direct from coastal farms and high mountain valleys", href: "/about" },
+                        ].map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setActiveDropdown(null)}
+                            className="group/col-item block"
+                          >
+                            <h4 className="font-serif text-sm font-bold text-black uppercase tracking-wider group-hover/col-item:text-blue-600 transition-colors">{item.name}</h4>
+                            <p className="text-[10px] text-zinc-400 font-medium mt-1 leading-relaxed">{item.desc}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
 
-                     {/* Column 3: Premium Brand Card */}
-                     <div className="col-span-4 relative overflow-hidden rounded-[20px] bg-black text-white p-8 flex flex-col justify-between min-h-[260px]">
-                        <div className="absolute inset-0 opacity-40">
-                           <img 
-                              src="https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=800" 
-                              alt="Botanical Pure Essence" 
-                              className="h-full w-full object-cover grayscale" 
-                           />
-                        </div>
-                        <div className="relative z-10 text-left">
-                           <span className="text-[8px] font-extrabold uppercase tracking-[0.4em] text-zinc-400">Botanical Guarantee</span>
-                           <h3 className="mt-3 font-serif text-lg font-extrabold leading-tight uppercase tracking-tight">Zero Thermal Searing</h3>
-                           <p className="mt-2 text-[10px] text-zinc-400 font-medium leading-relaxed max-w-[220px]">Every drop is stone-extracted below 38°C to retain all vital nutrient values.</p>
-                        </div>
-                        <div className="relative z-10 pt-4 text-left">
-                           <Link href="/about" onClick={() => setActiveDropdown(null)}>
-                              <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white border-b border-white pb-0.5 hover:text-zinc-300 transition-colors">
-                                 Extraction Story &rarr;
-                              </span>
-                           </Link>
-                        </div>
-                     </div>
+                    {/* Column 3: Premium Brand Card */}
+                    <div className="col-span-4 relative overflow-hidden rounded-[20px] bg-black text-white p-8 flex flex-col justify-between min-h-[260px]">
+                      <div className="absolute inset-0 opacity-40">
+                        <img
+                          src="/images/Premium Amber Oil Collection.png"
+                          alt="Botanical Pure Essence"
+                          className="h-full w-full object-cover grayscale"
+                        />
+                      </div>
+                      <div className="relative z-10 text-left">
+                        <span className="text-[8px] font-extrabold uppercase tracking-[0.4em] text-zinc-400">Botanical Guarantee</span>
+                        <h3 className="mt-3 font-serif text-lg font-extrabold leading-tight uppercase tracking-tight">Zero Thermal Searing</h3>
+                        <p className="mt-2 text-[10px] text-zinc-400 font-medium leading-relaxed max-w-[220px]">Every drop is stone-extracted below 38°C to retain all vital nutrient values.</p>
+                      </div>
+                      <div className="relative z-10 pt-4 text-left">
+                        <Link href="/about" onClick={() => setActiveDropdown(null)}>
+                          <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white border-b border-white pb-0.5 hover:text-zinc-300 transition-colors">
+                            Extraction Story &rarr;
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   /* Dynamic Category-Specific Product Mega Menu (fixed category hover show products) */
@@ -424,7 +433,7 @@ export function Header() {
                             {activeCat?.description || "Explore small-batch wood pressed organic oils, extracted at room temperature to preserve natural therapeutic components."}
                           </p>
                           <div className="pt-2">
-                            <Link 
+                            <Link
                               href={`/products?category=${activeCat?.slug}`}
                               onClick={() => setActiveDropdown(null)}
                               className="text-[9px] font-bold uppercase tracking-widest text-black border-b border-black pb-0.5 hover:text-zinc-600 transition-colors"
@@ -441,7 +450,7 @@ export function Header() {
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-4">
                               {catProducts.map((p) => {
                                 return (
-                                  <Link 
+                                  <Link
                                     key={p.id}
                                     href={`/products/${p.slug}`}
                                     onClick={() => setActiveDropdown(null)}
@@ -495,15 +504,15 @@ export function Header() {
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-6 border-b border-black/5 animate-in fade-in duration-300">
                   {settings?.logo_url ? (
-                    <img 
-                      src={settings.logo_url} 
-                      alt={settings.site_name || "Logo"} 
+                    <img
+                      src={settings.logo_url}
+                      alt={settings.site_name || "Logo"}
                       className="h-8 w-auto object-contain"
                     />
                   ) : settings?.logo_inverted_url ? (
-                    <img 
-                      src={settings.logo_inverted_url} 
-                      alt={settings.site_name || "Logo"} 
+                    <img
+                      src={settings.logo_inverted_url}
+                      alt={settings.site_name || "Logo"}
                       className="h-8 w-auto object-contain brightness-0"
                     />
                   ) : (
@@ -534,9 +543,9 @@ export function Header() {
                       Home
                     </span>
                     {pathname === "/" && (
-                      <motion.span 
-                        layoutId="activeMobileNavDot" 
-                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block" 
+                      <motion.span
+                        layoutId="activeMobileNavDot"
+                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block"
                       />
                     )}
                   </Link>
@@ -556,18 +565,18 @@ export function Header() {
                           Shop
                         </span>
                         {pathname.startsWith("/products") && (
-                          <motion.span 
-                            layoutId="activeMobileNavDot" 
-                            className="ml-3 h-[5px] w-[5px] rounded-full bg-black block" 
+                          <motion.span
+                            layoutId="activeMobileNavDot"
+                            className="ml-3 h-[5px] w-[5px] rounded-full bg-black block"
                           />
                         )}
                       </Link>
-                      <button 
+                      <button
                         onClick={() => setIsMobileShopOpen(!isMobileShopOpen)}
                         className="h-8 w-8 flex items-center justify-center text-zinc-400 hover:text-black active:scale-90 transition-all cursor-pointer"
                       >
                         <motion.span animate={{ rotate: isMobileShopOpen ? 180 : 0 }}>
-                           <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-4 w-4" />
                         </motion.span>
                       </button>
                     </div>
@@ -616,9 +625,9 @@ export function Header() {
                       About
                     </span>
                     {pathname === "/about" && (
-                      <motion.span 
-                        layoutId="activeMobileNavDot" 
-                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block" 
+                      <motion.span
+                        layoutId="activeMobileNavDot"
+                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block"
                       />
                     )}
                   </Link>
@@ -635,9 +644,9 @@ export function Header() {
                       Contact
                     </span>
                     {pathname === "/contact" && (
-                      <motion.span 
-                        layoutId="activeMobileNavDot" 
-                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block" 
+                      <motion.span
+                        layoutId="activeMobileNavDot"
+                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block"
                       />
                     )}
                   </Link>
@@ -654,9 +663,9 @@ export function Header() {
                       Account Portal
                     </span>
                     {pathname === "/account" && (
-                      <motion.span 
-                        layoutId="activeMobileNavDot" 
-                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block" 
+                      <motion.span
+                        layoutId="activeMobileNavDot"
+                        className="ml-3 h-[5px] w-[5px] rounded-full bg-black block"
                       />
                     )}
                   </Link>
@@ -668,8 +677,8 @@ export function Header() {
                 <span className="text-[7px] font-extrabold uppercase tracking-[0.3em] text-zinc-400 block mb-2">
                   Customer Concierge
                 </span>
-                <a 
-                  href={`mailto:${settings?.contact_email}`} 
+                <a
+                  href={`mailto:${settings?.contact_email}`}
                   className="text-xs font-semibold text-zinc-500 hover:text-black transition-colors duration-200"
                 >
                   {settings?.contact_email || "info@gmail.com"}

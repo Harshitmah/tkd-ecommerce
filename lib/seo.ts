@@ -8,18 +8,18 @@ export async function generateMetadata(
   slug?: string
 ): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  const defaultTitle = "AURA | Premium E-Commerce"
+  const defaultTitle = "Telkidukan | Premium E-Commerce"
   const defaultDescription = "Defining modern elegance through curated design and exceptional quality."
 
   return {
-    title: title ? `${title} | AURA` : defaultTitle,
+    title: title ? `${title} | Telkidukan` : defaultTitle,
     description: description || defaultDescription,
     metadataBase: new URL(siteUrl),
     openGraph: {
       title: title || defaultTitle,
       description: description || defaultDescription,
       url: slug ? `${siteUrl}/products/${slug}` : siteUrl,
-      siteName: "AURA",
+      siteName: "Telkidukan",
       images: [
         {
           url: image || "/og-image.jpg",

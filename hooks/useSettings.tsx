@@ -23,6 +23,8 @@ interface SiteSettings {
   currency_code: string
   currency_symbol: string
   show_categories_in_navbar?: boolean
+  shipping_fee?: number
+  free_shipping_threshold?: number
 }
 
 interface SettingsContextType {

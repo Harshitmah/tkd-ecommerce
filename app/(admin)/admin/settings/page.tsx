@@ -61,6 +61,9 @@ type SiteSettings = {
   razorpay_enabled: boolean
   cod_enabled: boolean
   show_categories_in_navbar?: boolean
+  custom_navbar_links?: { id: string; name: string; href: string }[]
+  shipping_fee: number
+  free_shipping_threshold: number
 }
 
 const defaultSettings: SiteSettings = {
@@ -87,7 +90,16 @@ const defaultSettings: SiteSettings = {
   social_youtube: "",
   razorpay_enabled: false,
   cod_enabled: true,
-  show_categories_in_navbar: false
+  show_categories_in_navbar: false,
+  custom_navbar_links: [
+    { id: "1", name: "Home", href: "/" },
+    { id: "2", name: "Shop", href: "/products" },
+    { id: "3", name: "Blog", href: "/blog" },
+    { id: "4", name: "About", href: "/about" },
+    { id: "5", name: "Contact", href: "/contact" }
+  ],
+  shipping_fee: 0,
+  free_shipping_threshold: 500
 }
 
 export default function AdminSettingsPage() {
@@ -123,10 +135,18 @@ export default function AdminSettingsPage() {
 
       const { data, error } = await supabase.from("site_settings").select("*").maybeSingle()
       if (data) {
+        let parsedLinks = defaultSettings.custom_navbar_links
+        if (data.social_tiktok) {
+          try {
+            const p = JSON.parse(data.social_tiktok)
+            if (Array.isArray(p)) parsedLinks = p
+          } catch (e) {}
+        }
         setSettings({
           ...defaultSettings,
           ...data,
-          show_categories_in_navbar: data.social_youtube === "true"
+          show_categories_in_navbar: data.social_youtube === "true",
+          custom_navbar_links: parsedLinks
         })
       }
 
@@ -148,10 +168,11 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const { id, created_at, show_categories_in_navbar, ...updateData }: any = settings
+    const { id, created_at, show_categories_in_navbar, custom_navbar_links, ...updateData }: any = settings
     const payload = {
       ...updateData,
       social_youtube: show_categories_in_navbar ? "true" : "false",
+      social_tiktok: JSON.stringify(custom_navbar_links || []),
       updated_at: new Date().toISOString()
     }
 
@@ -332,16 +353,63 @@ export default function AdminSettingsPage() {
                 </div>
               </Section>
 
-              <Section title="Storefront Navigation" description="Customize how navigation links and categories are displayed in the header.">
-                <div className="p-8 bg-gray-50/50 border border-gray-100 rounded-3xl flex items-center justify-between">
+              <Section title="Storefront Navigation" description="Customize the main navigation links displayed in your storefront header.">
+                <div className="space-y-6">
+                  {settings.custom_navbar_links?.map((link, idx) => (
+                    <div key={link.id} className="flex items-center gap-4 bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
+                      <div className="flex-1 grid grid-cols-2 gap-4">
+                        <Input 
+                          placeholder="Link Name (e.g. Perfumes)" 
+                          value={link.name} 
+                          onChange={(e) => {
+                            const newLinks = [...(settings.custom_navbar_links || [])];
+                            newLinks[idx].name = e.target.value;
+                            setSettings(p => ({ ...p, custom_navbar_links: newLinks }));
+                          }} 
+                        />
+                        <Input 
+                          placeholder="URL (e.g. /products?category=perfumes)" 
+                          value={link.href} 
+                          onChange={(e) => {
+                            const newLinks = [...(settings.custom_navbar_links || [])];
+                            newLinks[idx].href = e.target.value;
+                            setSettings(p => ({ ...p, custom_navbar_links: newLinks }));
+                          }} 
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const newLinks = settings.custom_navbar_links?.filter((_, i) => i !== idx);
+                          setSettings(p => ({ ...p, custom_navbar_links: newLinks }));
+                        }}
+                        className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-red-50 text-red-500 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      const newLinks = [...(settings.custom_navbar_links || []), { id: Date.now().toString(), name: "", href: "" }];
+                      setSettings(p => ({ ...p, custom_navbar_links: newLinks }));
+                    }}
+                    className="w-full border-dashed"
+                  >
+                    + Add Navbar Link
+                  </Button>
+                </div>
+
+                <div className="mt-8 p-6 bg-gray-50/50 border border-gray-100 rounded-3xl flex items-center justify-between">
                   <div className="flex items-center gap-4 text-left">
                      <div className="h-10 w-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-black">
                         <Globe className="h-5 w-5" />
                      </div>
                      <div>
-                        <p className="text-sm font-bold text-black">Category Tabs in Navbar</p>
+                        <p className="text-sm font-bold text-black">Append All Categories Automagically</p>
                         <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">
-                          {settings.show_categories_in_navbar ? 'Displaying Categories directly as Navbar Tabs' : 'Displaying Standard links only'}
+                          {settings.show_categories_in_navbar ? 'Categories are appended to your custom links' : 'Only showing the custom links defined above'}
                         </p>
                      </div>
                   </div>
@@ -573,6 +641,18 @@ export default function AdminSettingsPage() {
                           <span className="text-xs font-bold uppercase tracking-widest text-black">Inclusive Pricing</span>
                        </div>
                        <Toggle active={settings.tax_inclusive} onClick={() => setSettings(p => ({ ...p, tax_inclusive: !p.tax_inclusive }))} />
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-10">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-8">Shipping Configuration</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <Field label={`Shipping Fee (${settings.currency_symbol})`}>
+                        <Input type="number" value={settings.shipping_fee} onChange={e => setSettings(p => ({ ...p, shipping_fee: Number(e.target.value) }))} />
+                      </Field>
+                      <Field label={`Free Shipping Minimum Order (${settings.currency_symbol})`}>
+                        <Input type="number" value={settings.free_shipping_threshold} onChange={e => setSettings(p => ({ ...p, free_shipping_threshold: Number(e.target.value) }))} />
+                      </Field>
                     </div>
                   </div>
 

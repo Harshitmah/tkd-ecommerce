@@ -14,7 +14,8 @@ import {
   createStorefrontReview, 
   updateStorefrontReview, 
   deleteStorefrontReview,
-  getAllProductReviews
+  getAllProductReviews,
+  updateProductReview
 } from "@/app/actions/reviews"
 
 type Review = {
@@ -111,7 +112,15 @@ export default function ReviewsPage() {
             })
           }
         } else {
-          await supabase.from("reviews").update({ is_verified: status }).eq("id", id)
+          const item = productReviews.find(r => r.id === id)
+          if (item) {
+            await updateProductReview(id, {
+              title: item.title,
+              rating: item.rating,
+              body: item.body,
+              isVerified: status
+            })
+          }
         }
       }
       await fetchReviews()
@@ -172,28 +181,29 @@ export default function ReviewsPage() {
         }
       } else {
         // Product review save/update
-        const supabase = createClient()
         const payload = {
-          title: editingReview.title,
+          title: editingReview.title || "",
           rating: editingReview.rating,
           body: editingReview.body,
-          is_verified: !!editingReview.is_verified,
+          isVerified: !!editingReview.is_verified,
         }
 
-        let error
+        let res
         if (editingReview.id) {
-          const { error: err } = await supabase
-            .from("reviews")
-            .update(payload)
-            .eq("id", editingReview.id)
-          error = err
+          res = await updateProductReview(editingReview.id, payload)
+        } else {
+          // If admin is creating a product review from here (though normally they only edit), we'd call createProductReview.
+          // But there's no product selector in the modal, so we just alert.
+          alert("Cannot create new product reviews from this modal yet.")
+          setIsSaving(false)
+          return
         }
 
-        if (!error) {
+        if (res.success) {
           setIsModalOpen(false)
           await fetchReviews()
         } else {
-          alert("Error saving review: " + error.message)
+          alert("Error saving review: " + res.error)
         }
       }
     } catch (err: any) {

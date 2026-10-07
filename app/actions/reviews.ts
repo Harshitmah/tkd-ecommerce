@@ -306,3 +306,39 @@ export async function createProductReview(
   }
 }
 
+/**
+ * Update an existing product review
+ */
+export async function updateProductReview(
+  id: string,
+  data: {
+    title?: string
+    rating: number
+    body: string
+    isVerified: boolean
+  }
+) {
+  try {
+    const { data: review, error } = await supabaseAdmin
+      .from("reviews")
+      .update({
+        title: data.title || "",
+        rating: data.rating,
+        body: data.body,
+        is_verified: data.isVerified,
+      })
+      .eq("id", id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath("/admin/reviews")
+    revalidatePath("/products", "layout")
+    return { success: true, data: review }
+  } catch (error: any) {
+    console.error("Failed to update product review:", error)
+    return { success: false, error: error.message || "Failed to update review." }
+  }
+}
+

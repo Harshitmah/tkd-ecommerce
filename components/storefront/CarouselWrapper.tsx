@@ -7,9 +7,10 @@ interface CarouselWrapperProps {
   title: string
   subtitle: string
   children: React.ReactNode
+  rows?: number
 }
 
-export function CarouselWrapper({ title, subtitle, children }: CarouselWrapperProps) {
+export function CarouselWrapper({ title, subtitle, children, rows }: CarouselWrapperProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   const scroll = (direction: "left" | "right") => {
@@ -55,7 +56,13 @@ export function CarouselWrapper({ title, subtitle, children }: CarouselWrapperPr
       {/* Carousel Container */}
       <div
         ref={containerRef}
-        className="hide-scrollbar flex overflow-x-auto snap-x snap-mandatory gap-6 scroll-smooth pb-4"
+        className={`hide-scrollbar overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 ${
+          rows === 2
+            ? "grid grid-rows-2 grid-flow-col gap-6"
+            : rows && rows > 2 
+            ? `grid grid-rows-[repeat(${rows},minmax(0,1fr))] grid-flow-col gap-6`
+            : "flex gap-6"
+        }`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {children}

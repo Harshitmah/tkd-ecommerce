@@ -34,19 +34,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[90vh] max-w-lg flex-col items-center justify-center px-6 py-20 animate-in fade-in duration-1000">
-      <div className="w-full bg-white border border-zinc-100 shadow-2xl rounded-[40px] p-10 md:p-16">
-        <div className="flex flex-col items-center text-center mb-12">
-          <span className="text-xs font-bold uppercase tracking-[0.6em] text-accent mb-6">Portal Authorization</span>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-black">
-            Access Vault
+    <div className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center px-6 py-12 animate-in fade-in duration-500">
+      <div className="w-full bg-white border border-zinc-100 shadow-sm rounded-3xl p-8 md:p-10">
+        <div className="flex flex-col items-center text-center mb-8">
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-black">
+            Welcome Back
           </h1>
-          <p className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-zinc-400 leading-relaxed max-w-[280px]">
-            Enter your credentials to continue the Telkidukan experience.
+          <p className="mt-2 text-sm text-zinc-500">
+            Sign in to your account to continue.
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-8">
+        <form onSubmit={handleLogin} className="space-y-6">
           <Input
             label="Email Address"
             type="email"
@@ -54,10 +53,9 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="text-lg py-6"
           />
           
-          <div className="space-y-4">
+          <div className="space-y-2">
             <Input
               label="Password"
               type="password"
@@ -65,19 +63,18 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="text-lg py-6"
             />
             <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-accent transition-colors">
-                Forgot your password?
+              <Link href="/forgot-password" className="text-xs font-semibold text-zinc-400 hover:text-black transition-colors">
+                Forgot password?
               </Link>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 p-6 rounded-2xl border-2 border-red-100 flex items-start gap-4">
-              <X className="h-5 w-5 text-red-600 shrink-0 mt-1" />
-              <p className="text-[10px] font-bold text-red-600 uppercase tracking-[0.2em] leading-relaxed">
+            <div className="bg-red-50 p-4 rounded-2xl border border-red-100 flex items-start gap-3">
+              <X className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-red-600 leading-relaxed">
                 {error}
               </p>
             </div>
@@ -86,22 +83,20 @@ export default function LoginPage() {
           <Button
             variant="primary"
             size="lg"
-            className="h-16 w-full rounded-2xl shadow-premium text-xs font-bold uppercase tracking-[0.3em]"
+            className="h-14 w-full rounded-2xl text-sm font-bold tracking-wide"
             type="submit"
             loading={loading}
           >
-            Initialize Session
-            <ArrowRight className="ml-4 h-5 w-5" />
+            Sign In
           </Button>
         </form>
 
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center">
           <Link 
             href="/register" 
-            className="group flex items-center justify-center gap-3 w-full text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-black transition-all"
+            className="text-sm font-semibold text-zinc-500 hover:text-black transition-all"
           >
-            <div className="h-px w-8 bg-zinc-200 transition-all group-hover:w-12 group-hover:bg-black" />
-            Create Account
+            Don't have an account? <span className="text-black">Sign Up</span>
           </Link>
         </div>
       </div>

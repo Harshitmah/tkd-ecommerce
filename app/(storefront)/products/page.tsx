@@ -93,7 +93,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {/* Top Banner Image (Contained premium aesthetic matching homepage style but smaller) */}
       <div className="relative h-48 md:h-[30vh] md:min-h-[240px] w-full overflow-hidden rounded-[32px] mb-12 border border-white/[0.05] shadow-lg animate-in fade-in duration-1000 flex items-center bg-zinc-100">
         <img
-          src={activeCategoryObj?.image_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"}
+          src="/images/shop-banner.jpg"
           alt={activeCategoryObj?.name || "Our Catalog"}
           className="absolute inset-0 h-full w-full object-cover opacity-100"
         />
@@ -103,15 +103,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {/* Content overlaid inside the banner */}
         <div className="relative z-10 max-w-2xl pl-6 md:pl-16 pr-6 text-left">
           <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-amber-400/90">
-            Elegance Uncompromised
+            Nature's Purest Essence
           </span>
           <h1 className="font-serif text-2xl font-extrabold md:text-4xl lg:text-5xl tracking-tight text-white mt-1.5 uppercase">
             {activeCategoryObj ? activeCategoryObj.name : "Shop All"}
           </h1>
           <p className="mt-2 text-[10px] md:text-xs font-medium tracking-wide text-zinc-300 max-w-[90%] md:max-w-md leading-relaxed">
-            {activeCategoryObj 
+            {activeCategoryObj
               ? `Explore our curated selection of premium ${activeCategoryObj.name.toLowerCase()} products, crafted for your daily routine.`
-              : "Explore our curated catalog of modern essentials and meticulously finished boutique garments."
+              : "Explore our curated catalog of pure, cold-pressed essential and carrier oils for your daily routine."
             }
           </p>
         </div>
@@ -122,7 +122,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
           Showing {products?.length || 0} {products?.length === 1 ? "Product" : "Products"}
         </span>
-        <ProductFilters 
+        <ProductFilters
           categories={categories || []}
           activeCategory={category}
           activeSort={sort}

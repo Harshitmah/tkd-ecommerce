@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import MediaSelectorModal from "@/components/admin/MediaSelectorModal"
 import { saveProductData } from "@/app/actions/product"
+import { getActiveCombos } from "@/app/actions/combos"
 
 interface Variant {
   id?: string
@@ -52,6 +53,11 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
     initialData?.images?.map((img: any) => img.image_url) || []
   )
 
+  const [activeCombos, setActiveCombos] = React.useState<any[]>([])
+  React.useEffect(() => {
+    getActiveCombos().then(setActiveCombos)
+  }, [])
+
   // Parse structured data from description if it exists
   const parseDescription = (desc: string) => {
     try {
@@ -61,14 +67,15 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
         const data = JSON.parse(rawJson)
         return {
           text: parts[0].trim(),
-          highlights: data.highlights || [],
-          specifications: data.specifications || []
+          ingredients: data.ingredients || "",
+          highlights: data.howToUse || data.highlights || [],
+          specifications: data.additionalInfo || data.specifications || []
         }
       }
     } catch (e) {
       console.error("Error parsing product data", e)
     }
-    return { text: desc, highlights: [], specifications: [] }
+    return { text: desc, ingredients: "", highlights: [], specifications: [] }
   }
 
   const initialParsed = parseDescription(initialData?.description || "")
@@ -83,8 +90,10 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
     category_id: initialData?.category_id || "",
     status: initialData?.status || "draft",
     related_categories: initialData?.related_categories || [],
+    ingredients: initialParsed.ingredients,
     highlights: (initialData?.highlights as string[]) || initialParsed.highlights,
-    specifications: (initialData?.specifications as Specification[]) || initialParsed.specifications
+    specifications: (initialData?.specifications as Specification[]) || initialParsed.specifications,
+    tags: initialData?.tags || []
   })
 
   const [variants, setVariants] = React.useState<Variant[]>(
@@ -181,8 +190,9 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
     try {
       // Pack structured data into description as a hidden comment if columns don't exist
       const structuredData = {
-        highlights: formData.highlights,
-        specifications: formData.specifications
+        ingredients: formData.ingredients,
+        howToUse: formData.highlights,
+        additionalInfo: formData.specifications
       }
       const finalDescription = `${formData.description}\n\n<!--PRODUCT_DATA:${JSON.stringify(structuredData)}-->`
 
@@ -196,6 +206,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
         category_id: formData.category_id || null,
         status: formData.status as any,
         related_categories: formData.related_categories,
+        tags: formData.tags || []
       }
 
       const res = await saveProductData(productData, images, variants, initialData?.id)
@@ -249,7 +260,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
           </div>
 
           <div className="mt-8 space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Editorial Description</label>
+            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">What does it do for you ?</label>
             <textarea 
               name="description"
               value={formData.description}
@@ -257,6 +268,18 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
               rows={8}
               className="w-full bg-transparent border-b border-gray-100 py-4 text-sm outline-none focus:border-black transition-all resize-none placeholder:text-gray-300"
               placeholder="Tell the story of this product..."
+            />
+          </div>
+
+          <div className="mt-8 space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Ingredients (Optional)</label>
+            <textarea 
+              name="ingredients"
+              value={formData.ingredients}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full bg-transparent border-b border-gray-100 py-4 text-sm outline-none focus:border-black transition-all resize-none placeholder:text-gray-300"
+              placeholder="List the ingredients here..."
             />
           </div>
 
@@ -299,17 +322,17 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
            </div>
 
            <div className="space-y-12">
-              {/* Key Highlights */}
+              {/* How to Use */}
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Key Highlights</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">How to Use (Steps)</h4>
                   <button 
                     onClick={addHighlight}
                     type="button"
                     className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-black hover:opacity-70 transition-opacity"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Highlight
+                    Add Step
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -319,7 +342,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                         <Input 
                           value={h} 
                           onChange={(e) => updateHighlight(idx, e.target.value)} 
-                          placeholder="E.G. Premium quality latex material..."
+                          placeholder="E.G. Apply generously to clean, dry skin..."
                         />
                       </div>
                       <button 
@@ -332,22 +355,22 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                     </div>
                   ))}
                   {formData.highlights.length === 0 && (
-                    <p className="text-[10px] text-gray-300 italic ml-1">No highlights added yet.</p>
+                    <p className="text-[10px] text-gray-300 italic ml-1">No steps added yet.</p>
                   )}
                 </div>
               </div>
 
-              {/* Technical Specifications */}
+              {/* Additional Information */}
               <div className="border-t border-gray-50 pt-10">
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Technical Specifications</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Additional Information</h4>
                   <button 
                     onClick={addSpecification}
                     type="button"
                     className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-black hover:opacity-70 transition-opacity"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Spec
+                    Add Info
                   </button>
                 </div>
                 <div className="space-y-4">
@@ -381,7 +404,7 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                     </div>
                   ))}
                   {formData.specifications.length === 0 && (
-                    <p className="text-[10px] text-gray-300 italic ml-1">No specifications added yet.</p>
+                    <p className="text-[10px] text-gray-300 italic ml-1">No additional info added yet.</p>
                   )}
                 </div>
               </div>
@@ -628,6 +651,50 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                       {formData.related_categories.includes(cat.id) && <Check className="h-3 w-3" />}
                     </div>
                   ))}
+                </div>
+             </div>
+
+             <div className="border-t border-gray-50 pt-6">
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Active Combos</label>
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.tags?.filter(t => t.startsWith("combo:")).map(tag => {
+                      const comboId = tag.split("combo:")[1];
+                      const combo = activeCombos.find(c => c.id === comboId);
+                      return (
+                        <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-widest">
+                          {combo?.name || tag}
+                          <button type="button" onClick={() => {
+                            setFormData(p => ({ 
+                              ...p, 
+                              tags: p.tags.filter(t => t !== tag && t !== `combo_badge:${combo?.name}`) 
+                            }))
+                          }} className="hover:text-emerald-900 ml-1">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      )
+                    })}
+                  </div>
+                  <select 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:border-black transition-all cursor-pointer"
+                    onChange={e => {
+                      if (e.target.value && !formData.tags?.includes(`combo:${e.target.value}`)) {
+                        const combo = activeCombos.find(c => c.id === e.target.value);
+                        setFormData(p => ({ 
+                          ...p, 
+                          tags: [...(p.tags || []), `combo:${e.target.value}`, `combo_badge:${combo?.name || ""}`] 
+                        }))
+                      }
+                      e.target.value = ""
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="">+ Assign Combo</option>
+                    {activeCombos.map(combo => (
+                      <option key={combo.id} value={combo.id}>{combo.name}</option>
+                    ))}
+                  </select>
                 </div>
              </div>
 

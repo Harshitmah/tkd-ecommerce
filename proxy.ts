@@ -74,12 +74,26 @@ export async function proxy(request: NextRequest) {
       }
     )
 
-    // Check role from profiles table
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // Check role from profiles table by ID first
+    let { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
+
+    // Fallback: If no profile found by ID, try finding by email
+    // This allows manually created profiles in Supabase dashboard to work
+    if (!profile && user.email) {
+      const { data: emailProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('role')
+        .eq('email', user.email)
+        .single()
+        
+      if (emailProfile) {
+        profile = emailProfile
+      }
+    }
 
     if (!profile || profile.role !== 'admin') {
       console.warn("Proxy: User not admin. Profile:", profile, "Error:", profileError, "User ID:", user.id)

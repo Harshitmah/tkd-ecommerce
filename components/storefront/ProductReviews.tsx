@@ -37,7 +37,6 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
   const [reviews, setReviews] = React.useState<Review[]>(initialReviews)
   const [rating, setRating] = React.useState(5)
   const [hoverRating, setHoverRating] = React.useState<number | null>(null)
-  const [title, setTitle] = React.useState("")
   const [body, setBody] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [showForm, setShowForm] = React.useState(false)
@@ -63,8 +62,8 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
     e.preventDefault()
     if (!user) return
 
-    if (!title.trim() || !body.trim()) {
-      alert("Please fill out both review title and description.")
+    if (!body.trim()) {
+      alert("Please provide your review description.")
       return
     }
 
@@ -72,13 +71,12 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
     try {
       const res = await createProductReview(productId, user.id, {
         rating,
-        title,
+        title: "",
         body,
       })
 
       if (res.success && res.data) {
         // Clear form
-        setTitle("")
         setBody("")
         setRating(5)
         setShowForm(false)
@@ -217,20 +215,6 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
                     </div>
                   </div>
 
-                  {/* Review Title */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 ml-1">
-                      Review Title
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="E.G. Outstanding product purity!"
-                      className="w-full bg-transparent border-b border-zinc-200 py-3 text-sm outline-none focus:border-black transition-all placeholder:text-zinc-300 text-black font-semibold"
-                      required
-                    />
-                  </div>
 
                   {/* Review Description */}
                   <div className="space-y-2">
@@ -370,11 +354,8 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
                         </div>
                       </div>
 
-                      {/* Review Title & Body */}
+                      {/* Review Body */}
                       <div className="pl-14 space-y-2">
-                        <h6 className="text-sm font-bold text-black leading-tight uppercase tracking-wide">
-                          {review.title}
-                        </h6>
                         <p className="text-xs leading-relaxed text-zinc-500 font-medium whitespace-pre-line">
                           {review.body}
                         </p>
