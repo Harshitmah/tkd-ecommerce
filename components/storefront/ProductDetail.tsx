@@ -117,7 +117,7 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-2 lg:py-6 animate-in fade-in duration-1000">
-      <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-24">
         {/* Left: Image Gallery */}
         <div className="flex flex-col gap-6">
           <div className="relative aspect-square w-full overflow-hidden rounded-[32px] bg-zinc-50 border border-zinc-100 shadow-sm">
@@ -163,12 +163,7 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
 
         {/* Right: Product Info */}
         <div className="flex flex-col py-2">
-          <div className="flex items-center justify-between mb-6">
-            <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">
-              <span className="hover:text-black cursor-pointer transition-colors">SHOP</span>
-              <ChevronRight className="h-3 w-3" />
-              <span className="text-black">{product.category?.name || "COLLECTION"}</span>
-            </nav>
+          <div className="flex items-center justify-end mb-4">
             <div className="flex items-center gap-6">
               <div className="relative" ref={shareDropdownRef}>
                 <button 
@@ -276,11 +271,11 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
             </div>
           </div>
 
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-black md:text-6xl">
+          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-black md:text-5xl">
             {product.title}
           </h1>
 
-          <div className="mt-6 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-4">
             <div className="flex items-center bg-zinc-50 px-3 py-1.5 rounded-full">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -288,7 +283,7 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
                   className={cn(
                     "h-3 w-3",
                     i < Math.round(parseFloat(averageRating))
-                      ? "fill-black text-black"
+                      ? "fill-yellow-400 text-yellow-400"
                       : "text-zinc-200"
                   )}
                 />
@@ -302,7 +297,13 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
             )}
           </div>
 
-          <div className="mt-10 flex items-baseline gap-4">
+          {product.meta_description && (
+            <p className="mt-4 text-sm text-zinc-500 font-medium leading-relaxed max-w-xl">
+              {product.meta_description}
+            </p>
+          )}
+
+          <div className="mt-6 flex items-baseline gap-4">
             <span className="text-4xl font-extrabold tracking-tighter text-black">
               {formatCurrency(displayPrice, currency, symbol)}
             </span>
@@ -313,11 +314,11 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
             )}
           </div>
 
-          <div className="mt-12 space-y-10 border-t border-zinc-100 pt-10">
+          <div className="mt-8 space-y-6 border-t border-zinc-100 pt-8">
             {/* Variants */}
             {product.variants && product.variants.length > 0 && (
               <div>
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-6">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-4">
                   Select Configuration
                 </h3>
                 <div className="flex flex-wrap gap-4">
@@ -389,7 +390,7 @@ export function ProductDetail({ product, reviews = [] }: ProductDetailProps) {
       </div>
 
       {/* Expanded Details Section - Accordion Style */}
-      <div className="mt-12 border-t border-zinc-100 pt-8 pb-16 max-w-3xl mx-auto">
+      <div className="mt-12 border-t border-zinc-100 pt-8 pb-8 max-w-3xl mx-auto">
         <Accordion title="What does it do for you ?">
           <p className="leading-relaxed whitespace-pre-wrap">{text || "Information not available."}</p>
         </Accordion>

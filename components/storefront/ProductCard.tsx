@@ -18,6 +18,9 @@ interface ProductCardProps {
     is_new?: boolean
     is_sale?: boolean
     tags?: string[] | null
+    description?: string | null
+    variants?: any[]
+    reviews?: { rating: number, is_verified: boolean }[]
   }
 }
 
@@ -37,6 +40,12 @@ export function ProductCard({ product }: ProductCardProps) {
     ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
     : 0
 
+  const approvedReviews = product.reviews?.filter(r => r.is_verified !== false) || []
+  const reviewCount = approvedReviews.length
+  const avgRating = reviewCount > 0 
+    ? Math.round(approvedReviews.reduce((sum, r) => sum + (r.rating || 5), 0) / reviewCount)
+    : 5
+
   return (
     <div className="group relative flex flex-col animate-in fade-in duration-500">
       {/* Image Container */}
@@ -46,6 +55,11 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         {/* Badges */}
         <div className="absolute left-0 top-0 z-10 flex flex-col items-start gap-1">
+          {product.tags?.filter(t => t.startsWith("badge:")).map(tag => (
+            <span key={tag} className="bg-[#004236] px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
+              {tag.replace("badge:", "")}
+            </span>
+          ))}
           {product.tags?.filter(t => t.startsWith("combo_badge:")).map(tag => (
             <span key={tag} className="bg-[#b91c1c] px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
               {tag.replace("combo_badge:", "")}
@@ -68,59 +82,63 @@ export function ProductCard({ product }: ProductCardProps) {
         <img
           src={mainImage}
           alt={product.title}
-          className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:opacity-0"
+          className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 group-hover:scale-110"
         />
         <img
           src={hoverImage}
           alt={product.title}
           className="absolute inset-0 h-full w-full scale-110 object-cover opacity-0 transition-all duration-1000 group-hover:scale-100 group-hover:opacity-100"
         />
-
-        {/* Quick Add Overlay */}
-        <div className="absolute inset-x-0 bottom-0 translate-y-full bg-accent p-4 transition-transform duration-500 group-hover:translate-y-0">
-          <button className="flex w-full items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-            <ShoppingBag className="h-4 w-4" />
-            Add to Cart
-          </button>
-        </div>
       </Link>
 
       {/* Info Container */}
-      <div className="mt-3 flex flex-col items-start text-left">
-        {/* Mock Reviews Section */}
-        <div className="flex items-center gap-1 mb-1.5 text-xs text-zinc-500">
-          <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-          <span className="font-medium text-zinc-800">4.8</span>
-          <span className="text-blue-500 mx-0.5" title="Verified">
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-7.9 7.9z"></path>
-            </svg>
-          </span>
-          <span className="ml-1">(341 Reviews)</span>
-        </div>
-
+      <div className="mt-3 flex flex-col items-start text-left w-full">
+        {/* Name */}
         <Link href={`/products/${product.slug}`} className="group/link w-full">
-          <h3 className="font-sans text-[13px] md:text-sm font-medium text-black line-clamp-2 leading-snug group-hover/link:underline decoration-1 underline-offset-2">
+          <h3 className="font-sans text-lg md:text-[19px] font-bold text-zinc-900 line-clamp-2 leading-snug group-hover/link:text-black transition-colors">
             {product.title}
           </h3>
         </Link>
 
-        <div className="mt-2.5 flex items-center gap-2 font-sans">
-          {hasSale ? (
-            <>
-              <span className="text-xs md:text-[13px] text-zinc-500 line-through">
-                Rs. {originalPrice.toFixed(2)}
-              </span>
-              <span className="text-sm font-semibold text-red-600">
-                From Rs. {currentPrice.toFixed(2)}
-              </span>
-            </>
-          ) : (
-            <span className="text-sm font-semibold text-red-600">
-              Rs. {currentPrice.toFixed(2)}
+        {/* Rating Section */}
+        <div className="flex items-center gap-1 mt-1.5 text-xs text-zinc-500">
+          <div className="flex text-yellow-400">
+            {[1, 2, 3, 4, 5].map(i => (
+              <Star key={i} className={cn("h-4 w-4", i <= avgRating ? "fill-current text-yellow-400" : "text-zinc-300")} />
+            ))}
+          </div>
+          <span className="font-medium ml-1 text-sm">({reviewCount})</span>
+        </div>
+
+        {/* Mini Description */}
+        <p className="mt-2 text-[13px] text-zinc-500 line-clamp-1 truncate w-full">
+          {product.meta_description || "\u00A0"}
+        </p>
+
+        {/* Optional Gift Badge */}
+        {product.tags?.some(t => t.toLowerCase() === "gift with purchase*") && (
+          <div className="mt-2 bg-[#d4c852] text-black text-[11px] font-bold px-2 py-0.5">
+            Gift with Purchase*
+          </div>
+        )}
+
+
+        {/* Price */}
+        <div className="mt-1 flex items-center font-sans">
+          <span className="text-[22px] font-extrabold text-black">
+            ₹{currentPrice.toFixed(0)}
+          </span>
+          {hasSale && (
+            <span className="ml-2 text-[14px] text-zinc-400 line-through font-medium">
+              ₹{originalPrice.toFixed(0)}
             </span>
           )}
         </div>
+
+        {/* Add to Bag Button */}
+        <button className="mt-3 w-full bg-black hover:bg-zinc-900 text-white py-3 px-4 font-bold text-[14px] transition-colors rounded-sm shadow-sm active:scale-[0.98]">
+          Add to Bag
+        </button>
       </div>
     </div>
   )

@@ -43,7 +43,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     .select(`
       *,
       category:categories(name, slug),
-      images:product_images(image_url)
+      images:product_images(image_url),
+      variants:product_variants(*),
+      reviews(rating, is_verified)
     `)
     .eq("status", "active")
 

@@ -93,7 +93,8 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
     ingredients: initialParsed.ingredients,
     highlights: (initialData?.highlights as string[]) || initialParsed.highlights,
     specifications: (initialData?.specifications as Specification[]) || initialParsed.specifications,
-    tags: initialData?.tags || []
+    tags: initialData?.tags || [],
+    meta_description: initialData?.meta_description || ""
   })
 
   const [variants, setVariants] = React.useState<Variant[]>(
@@ -206,7 +207,8 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
         category_id: formData.category_id || null,
         status: formData.status as any,
         related_categories: formData.related_categories,
-        tags: formData.tags || []
+        tags: formData.tags || [],
+        meta_description: formData.meta_description
       }
 
       const res = await saveProductData(productData, images, variants, initialData?.id)
@@ -257,6 +259,18 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                 placeholder="organic-lavender-essence"
               />
             </Field>
+          </div>
+
+          <div className="mt-8 space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Mini Description (Shown below title)</label>
+            <textarea 
+              name="meta_description"
+              value={formData.meta_description}
+              onChange={handleInputChange}
+              rows={2}
+              className="w-full bg-transparent border-b border-gray-100 py-4 text-sm outline-none focus:border-black transition-all resize-none placeholder:text-gray-300"
+              placeholder="A short punchy description..."
+            />
           </div>
 
           <div className="mt-8 space-y-2">
@@ -698,14 +712,67 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                 </div>
              </div>
 
+             <div className="border-t border-gray-50 pt-6">
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Product Badge</label>
+                <div className="mt-3">
+                  <select 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-black outline-none focus:border-black transition-all cursor-pointer"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData(p => {
+                        const filteredTags = (p.tags || []).filter((t: string) => !t.startsWith("badge:"));
+                        if (val) {
+                          return { ...p, tags: [...filteredTags, `badge:${val}`] };
+                        }
+                        return { ...p, tags: filteredTags };
+                      })
+                    }}
+                    value={formData.tags?.find((t: string) => t.startsWith("badge:"))?.replace("badge:", "") || ""}
+                  >
+                    <option value="">None</option>
+                    <option value="MOST LOVED">Most Loved</option>
+                    <option value="BESTSELLER">Bestseller</option>
+                    <option value="NEW">New</option>
+                  </select>
+                </div>
+             <div className="border-t border-gray-50 pt-6">
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Storefront Sections</label>
+                <div className="mt-3 space-y-2">
+                  {[
+                    { id: "section:just_arrived", label: "Just Arrived" },
+                    { id: "section:most_loved", label: "Most Loved" },
+                    { id: "section:recommended", label: "Recommended for you" }
+                  ].map(section => (
+                    <label key={section.id} className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.tags?.includes(section.id) || false}
+                        onChange={(e) => {
+                          setFormData(p => {
+                            const tags = p.tags || [];
+                            if (e.target.checked) {
+                              return { ...p, tags: [...tags, section.id] };
+                            } else {
+                              return { ...p, tags: tags.filter((t: string) => t !== section.id) };
+                            }
+                          })
+                        }}
+                        className="rounded border-gray-300 text-black focus:ring-black"
+                      />
+                      <span className="text-xs font-bold text-gray-600">{section.label}</span>
+                    </label>
+                  ))}
+                </div>
+             </div>
              <div className="border-t border-gray-50 pt-6 flex flex-col gap-3">
                 <Button variant="primary" size="lg" onClick={handleSubmit} loading={loading} className="w-full h-12 text-xs">
-                  <Save className="mr-2 h-4 w-4" />
-                  Persist Product
+                   <Save className="mr-2 h-4 w-4" />
+                   Persist Product
                 </Button>
                 <Link href="/admin/products" className="w-full">
                    <Button variant="outline" size="lg" className="w-full h-12 bg-white text-xs">Cancel Entry</Button>
                 </Link>
+             </div>
              </div>
             </div>
           </div>

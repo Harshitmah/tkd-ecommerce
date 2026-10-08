@@ -22,11 +22,27 @@ export default async function Home() {
     .select(`
       *,
       category:categories(name, slug),
-      images:product_images(image_url)
+      images:product_images(image_url),
+      variants:product_variants(*),
+      reviews(rating, is_verified)
     `)
     .eq("status", "active")
     .order("created_at", { ascending: false })
-    .limit(16)
+    .limit(50)
+
+  const activeProducts = products || [];
+
+  const justArrived = activeProducts.some(p => p.tags?.includes('section:just_arrived'))
+    ? activeProducts.filter(p => p.tags?.includes('section:just_arrived'))
+    : activeProducts.slice(0, 8);
+
+  const mostLoved = activeProducts.some(p => p.tags?.includes('section:most_loved'))
+    ? activeProducts.filter(p => p.tags?.includes('section:most_loved'))
+    : activeProducts.slice(0, 6);
+
+  const recommended = activeProducts.some(p => p.tags?.includes('section:recommended'))
+    ? activeProducts.filter(p => p.tags?.includes('section:recommended'))
+    : activeProducts.slice(0, 8);
 
   // 3. Fetch Storefront Reviews
   const storefrontReviews = await getStorefrontReviews()
@@ -137,8 +153,8 @@ export default async function Home() {
       {/* 4. Recently Added Carousel (Reduced padding & smaller gap cards) */}
       <section className="bg-zinc-50/50 py-12 md:py-16 border-t border-b border-black/5">
         <div className="mx-auto max-w-[1600px] px-6 md:px-16">
-          <CarouselWrapper title="Recently Added" subtitle="Latest Drops" rows={2}>
-            {products?.map((product) => (
+          <CarouselWrapper title="Just Arrived" subtitle="Latest Drops" rows={2}>
+            {justArrived.map((product) => (
               <div key={product.id} className="w-[75vw] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] shrink-0 snap-start hover-lift transition-all">
                 <ProductCard product={product as any} />
               </div>
@@ -182,8 +198,8 @@ export default async function Home() {
 
             {/* Product Carousel (60% width on large screens) */}
             <div className="lg:col-span-8 flex flex-col justify-center">
-              <CarouselWrapper title="New In Collection" subtitle="Featured Drops">
-                {products?.slice(0, 6).map((product) => (
+              <CarouselWrapper title="Most Loved" subtitle="Featured Drops">
+                {mostLoved.map((product) => (
                   <div key={`new-${product.id}`} className="w-[210px] shrink-0 snap-start hover-lift transition-all">
                     <ProductCard product={product as any} />
                   </div>
@@ -201,6 +217,19 @@ export default async function Home() {
           <h2 className="mt-4 font-serif text-3xl font-extrabold md:text-4xl mb-12 uppercase tracking-tight">The Telkidukan Experience</h2>
 
           <ReviewsCarousel reviews={storefrontReviews as any[]} />
+        </div>
+      </section>
+
+      {/* Recommended For You Section */}
+      <section className="bg-zinc-50/50 py-12 md:py-16 border-b border-black/5">
+        <div className="mx-auto max-w-[1600px] px-6 md:px-16">
+          <CarouselWrapper title="Recommended for you" subtitle="Curated Choices">
+            {recommended.map((product) => (
+              <div key={`rec-${product.id}`} className="w-[75vw] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] shrink-0 snap-start hover-lift transition-all">
+                <ProductCard product={product as any} />
+              </div>
+            ))}
+          </CarouselWrapper>
         </div>
       </section>
 
@@ -241,36 +270,75 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 8. Minimalist Lifestyle Moodboard (Replacing Newsletter) */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="mx-auto max-w-[1600px] px-6 md:px-16 text-center">
-          <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-zinc-400">Natural Essence</span>
-          <h2 className="mt-3 font-serif text-3xl font-extrabold md:text-4xl text-black uppercase tracking-tight">PURE OILS. PURE LIFESTYLE.</h2>
-          <p className="mt-2 text-xs text-zinc-500 max-w-md mx-auto font-medium">
-            Cold pressed & steam distilled oils inspired by nature.
-          </p>
+      {/* 8. Combos & Premium Boxes Section */}
+      <section className="py-16 md:py-24 bg-zinc-50 border-t border-zinc-100">
+        <div className="mx-auto max-w-[1600px] px-6 md:px-16">
+          <div className="flex flex-col items-center text-center mb-16">
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.4em] text-zinc-400">Curated Sets</span>
+            <h2 className="mt-4 font-serif text-4xl md:text-5xl font-extrabold text-black uppercase tracking-tight">Exclusive Combos & Boxes</h2>
+            <p className="mt-4 text-sm text-zinc-500 max-w-xl font-medium leading-relaxed">
+              Discover our thoughtfully paired 2-pack combos and premium oil boxes. The perfect harmony of nature's best, bundled together for your daily wellness rituals.
+            </p>
+          </div>
 
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {[
-              { id: 1, title: "For Pooja", url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2004_00_37%20PM.png" },
-              { id: 2, title: "Food Enhancers", url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2003_51_29%20PM.png" },
-              { id: 3, title: "Hair Growth", url: "https://kbiijzysfliimnnlnhde.supabase.co/storage/v1/object/public/media/ChatGPT%20Image%20May%2020,%202026,%2003_52_37%20PM.png" }
-            ].map((collection) => (
-              <Link key={collection.id} href={`/products?search=${collection.title.toLowerCase().replace(' ', '+')}`} className="group block text-left">
-                <div className="relative overflow-hidden aspect-square sm:aspect-[4/5] bg-zinc-150 mb-4 rounded-md">
-                  <img
-                    src={collection.url}
-                    alt={collection.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            {/* Combo 1 */}
+            <Link href="/products?category=combos" className="group block">
+              <div className="relative overflow-hidden aspect-[4/3] md:aspect-[16/10] bg-white border border-black/5 rounded-[32px] shadow-sm">
+                <img
+                  src="/images/combo-pack-1.png" // Add your combo image here
+                  alt="Hair & Scalp Revitalizer Combo"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-500" />
+                <div className="absolute top-6 left-6">
+                  <span className="bg-black text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                    Most Popular
+                  </span>
                 </div>
-                <p className="text-base font-semibold text-black flex items-center gap-1.5 transition-colors group-hover:text-zinc-600">
-                  {collection.title}
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+              <div className="mt-6 text-center">
+                <h3 className="text-xl md:text-2xl font-serif font-bold text-black group-hover:text-zinc-600 transition-colors">
+                  Hair & Scalp Revitalizer (2-Pack)
+                </h3>
+                <p className="mt-2 text-sm text-zinc-500 font-medium">
+                  Rosemary + Coconut Oil • Deep conditioning and root stimulation for thicker, stronger hair.
                 </p>
-              </Link>
-            ))}
+                <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
+                  <span>Explore Combo</span>
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
+            {/* Combo 2 */}
+            <Link href="/products?category=combos" className="group block">
+              <div className="relative overflow-hidden aspect-[4/3] md:aspect-[16/10] bg-white border border-black/5 rounded-[32px] shadow-sm">
+                <img
+                  src="/images/combo-pack-1.png" // Add your combo image here
+                  alt="Daily Glow Wellness Box"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-500" />
+                <div className="absolute top-6 left-6">
+                  <span className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
+                    Premium Box
+                  </span>
+                </div>
+              </div>
+              <div className="mt-6 text-center">
+                <h3 className="text-xl md:text-2xl font-serif font-bold text-black group-hover:text-zinc-600 transition-colors">
+                  Daily Glow Wellness Box
+                </h3>
+                <p className="mt-2 text-sm text-zinc-500 font-medium">
+                  Lavender + Sweet Almond Oil • A complete rejuvenating ritual for radiant, healthy skin.
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
+                  <span>Explore Box</span>
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -297,7 +365,7 @@ function ReviewCard({ author, rating, text, date }: { author: string, rating: nu
     <div className="p-8 border border-black/5 bg-zinc-50/30 rounded-2xl space-y-4 hover:bg-white hover:shadow-premium transition-all duration-500">
       <div className="flex gap-0.5">
         {[...Array(rating)].map((_, i) => (
-          <Star key={i} className="h-3 w-3 fill-black text-black" />
+          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
         ))}
       </div>
       <p className="text-xs italic leading-relaxed text-zinc-600 font-medium">"{text}"</p>

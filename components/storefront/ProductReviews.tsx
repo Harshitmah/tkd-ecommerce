@@ -94,7 +94,7 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
   }
 
   return (
-    <section className="mt-24 border-t border-zinc-100 pt-20">
+    <section className="mt-12 border-t border-zinc-100 pt-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
         {/* Dynamic Reviews Statistics Card (Left 4 cols) */}
         <div className="lg:col-span-4 bg-zinc-50/50 border border-zinc-100 rounded-[32px] p-8 space-y-6">
@@ -115,7 +115,7 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
                     className={cn(
                       "h-4 w-4",
                       i < Math.round(parseFloat(averageRating))
-                        ? "fill-black text-black"
+                        ? "fill-yellow-400 text-yellow-400"
                         : "text-zinc-200"
                     )}
                   />
@@ -135,10 +135,10 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
               return (
                 <div key={stars} className="flex items-center gap-4 text-xs font-bold text-black/80">
                   <span className="w-3 text-right">{stars}</span>
-                  <Star className="h-3 w-3 fill-black text-black shrink-0" />
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
                   <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-black rounded-full transition-all duration-1000"
+                      className="h-full bg-yellow-400 rounded-full transition-all duration-1000"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -206,7 +206,7 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
                             className={cn(
                               "h-7 w-7 transition-colors",
                               star <= (hoverRating ?? rating)
-                                ? "fill-black text-black"
+                                ? "fill-yellow-400 text-yellow-400"
                                 : "text-zinc-200"
                             )}
                           />
@@ -339,7 +339,7 @@ export function ProductReviews({ productId, productSlug, initialReviews }: Produ
                                 key={i}
                                 className={cn(
                                   "h-3 w-3",
-                                  i < review.rating ? "fill-black text-black" : "text-zinc-200"
+                                  i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-200"
                                 )}
                               />
                             ))}
