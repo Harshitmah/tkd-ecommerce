@@ -19,6 +19,7 @@ interface ProductCardProps {
     is_sale?: boolean
     tags?: string[] | null
     description?: string | null
+    meta_description?: string | null
     variants?: any[]
     reviews?: { rating: number, is_verified: boolean }[]
   }
