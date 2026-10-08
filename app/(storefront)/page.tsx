@@ -52,19 +52,19 @@ export default async function Home() {
     {
       id: "slide-1",
       image_url: "/images/banner-2.png",
-      mobile_image_url: "/images/Banner-2-mobile.png",
+      mobile_image_url: "/images/banner-2-mobile.png",
       cta_link: "/products",
     },
     {
       id: "slide-2",
-      image_url: "/images/Banner-1.png",
-      mobile_image_url: "/images/Banner-1-mobile.png",
+      image_url: "/images/banner-1.png",
+      mobile_image_url: "/images/banner-1-mobile.png",
       cta_link: "/products",
     },
     {
       id: "slide-3",
-      image_url: "/images/Banner-3.png",
-      mobile_image_url: "/images/Banner-3-mobile.png",
+      image_url: "/images/banner-3.png",
+      mobile_image_url: "/images/banner-3-mobile.png",
       cta_link: "/products",
     },
   ]
